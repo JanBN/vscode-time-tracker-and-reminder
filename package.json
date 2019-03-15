@@ -22,19 +22,19 @@
 		"commands": [
 			{
 				"command": "extension.clearAllData",
-				"title": "(Time tracker) Clear all time data"
+				"title": "(Time Tracker & Reminder) Clear all time data"
 			},
 			{
 				"command": "extension.toggleStop",
-				"title": "(Time tracker) Toggle stop"
+				"title": "(Time Tracker & Reminder) Toggle stop"
 			},
 			{
 				"command": "extension.showDataFilePath",
-				"title": "(Time tracker) Show data file path"
+				"title": "(Time Tracker & Reminder) Show data file path"
 			},
 			{
 				"command": "extension.showLog",
-				"title": "(Time tracker) Show log"
+				"title": "(Time Tracker & Reminder) Show log"
 			}
 		],
 		"configuration": {

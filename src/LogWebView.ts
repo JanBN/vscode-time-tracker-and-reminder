@@ -99,7 +99,7 @@ export class LogWebView {
     const tableRows = [];
     for (var key in dayTimeIntervals) {
       const keyNumber = +key;
-      const dayString = moment(keyNumber).format("YYYY-MM-DD dddd");
+      let dayString = moment(keyNumber).format("YYYY-MM-DD dddd");
 
       const timeIntervals: TimeInterval[] = dayTimeIntervals[key];
       const totalDayTimeMillisecondsArray = timeIntervals.map(x => x.end - x.start);
@@ -111,10 +111,11 @@ export class LogWebView {
       tableRows.push(
         `
         <tr>
-          <td style="min-width: 100px;"><b>${dayString}</b></td>
+          <td style="min-width: 100px;"><b>Day</b></td>
           <td style="min-width: 100px;"><b>Worspace</b></td> 
           <td style="min-width: 100px;"><b>Time</b></td> 
         </tr>
+  
         `
       );
 
@@ -128,19 +129,22 @@ export class LogWebView {
         tableRows.push(
           `
           <tr>
-            <td style="min-width: 100px;"></td>
+            <td style="min-width: 100px;"><b>${dayString }</b></td>
             <td style="min-width: 100px;">${workspaceName}</td> 
             <td style="min-width: 100px;">${workspaceSumString}</td> 
           </tr>
           `
         );
+
+        dayString = ""; // clear date string so it is shwon only the first time
       }
+
 
       tableRows.push(
         `
           <tr>
             <td style="min-width: 100px;"></td>
-            <td style="min-width: 100px;">Total</td> 
+            <td style="min-width: 100px;"><b>Total</b></td> 
             <td style="min-width: 100px;"><b>${totalDayString}</b></td> 
           </tr>
           `

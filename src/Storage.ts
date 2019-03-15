@@ -53,12 +53,15 @@ export class Storage {
       }
 
       if (intersectedElements.length > 0) {
+        const delimiter = "; ";
         resultIntervals = resultIntervals.filter(x => !intersectedElements.some(y => y == x));
-        const workspaces = new Set(resultIntervals.map(x => x.workspace));
-
+        const workspacesSomeWithDelimitedStrings = new Set(resultIntervals.map(x => x.workspace));        
+        const arrayOfArrays = [...workspacesSomeWithDelimitedStrings].map(x => x.split(delimiter));
+        const flatArrayOFWorkspaces = [].concat.apply([], arrayOfArrays)
+        
         const newInterval: TimeInterval =
         {
-          workspace: [...workspaces].join("; "),
+          workspace: [... new Set(flatArrayOFWorkspaces)].join(delimiter),
           start: Math.min(...intersectedElements.map(x => x.start)),
           end: Math.max(...intersectedElements.map(x => x.end)),
 
