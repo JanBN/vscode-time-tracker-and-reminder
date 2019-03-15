@@ -1,0 +1,98 @@
+{
+	"name": "time-tracker-and-reminder",
+	"displayName": "Time Tracker & Reminder",
+	"description": "Track your working time and remind your blink pauses",
+	"version": "1.0.0",
+	"publisher": "JanBn",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/JanBN/vscode-time-tracker-and-reminder"
+	},
+	"engines": {
+		"vscode": "^1.1.30"
+	},
+	"categories": [
+		"Other"
+	],
+	"activationEvents": [
+		"*"
+	],
+	"main": "./dist/extension",
+	"contributes": {
+		"commands": [
+			{
+				"command": "extension.clearAllData",
+				"title": "(Time tracker) Clear all time data"
+			},
+			{
+				"command": "extension.toggleStop",
+				"title": "(Time tracker) Toggle stop"
+			},
+			{
+				"command": "extension.showDataFilePath",
+				"title": "(Time tracker) Show data file path"
+			},
+			{
+				"command": "extension.showLog",
+				"title": "(Time tracker) Show log"
+			}
+		],
+		"configuration": {
+			"type": "object",
+			"title": "Time Tracker & Reminder",
+			"properties": {
+				"time-tracker.reminders": {
+					"type": "string",
+					"default": "[{\"title\": \"Blink\",\"intervalMinutes\": 5,\"pauseMinutes\": 0,\"autoPause\": true,\"showCountDown\": true,\"autoStartAfterPause\": true},{\"title\": \"Look at distance\",\"intervalMinutes\": 18,\"pauseMinutes\": 0,\"autoPause\": true,\"showCountDown\": true,\"autoStartAfterPause\": true}]",
+					"description": "Reminders json array. See readme."
+				},
+				"time-tracker.showTotalTime": {
+					"type": "boolean",
+					"default": false,
+					"description": "Show total time in toolbar"
+				},
+				"time-tracker.showTotalWorkspaceTime": {
+					"type": "boolean",
+					"default": false,
+					"description": "Show total workspace time in toolbar"
+				},
+				"time-tracker.showTodayTime": {
+					"type": "boolean",
+					"default": true,
+					"description": "Show total today time in toolbar"
+				},
+				"time-tracker.showFromStartTime": {
+					"type": "boolean",
+					"default": true,
+					"description": "Show from start time in toolbar"
+				},
+				"time-tracker.showNextReminder": {
+					"type": "boolean",
+					"default": "true",
+					"description": "Show next reminder in toolbar"
+				}
+			}
+		}
+	},
+	"scripts": {
+		"vscode:prepublish": "webpack --mode production",
+		"webpack": "webpack --mode development",
+		"webpack-dev": "webpack --mode development --watch",
+		"test-compile": "tsc -p ./",
+		"postinstall": "node ./node_modules/vscode/bin/install"
+	},
+	"icon": "assets/icon.png",
+	"devDependencies": {
+		"@types/node": "^8.10.25",
+		"ts-loader": "^4.4.2",
+		"tslint": "^5.8.0",
+		"typescript": "^3.3.3333",
+		"vscode": "^1.1.30",
+		"webpack": "^4.19.1",
+		"webpack-cli": "^3.1.0"
+	},
+	"dependencies": {
+		"moment": "^2.22.2",
+		"moment-duration-format": "^2.2.2"
+	}
+}
