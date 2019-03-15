@@ -26,7 +26,7 @@ Track your time using vscode editor, see log, and remind you pauses for blinking
 
 **(Time Tracker & Reminder) Toggle stop** - Stops/Starts counting time
 
-**(Time Tracker & Reminder) Show data file path** - Shows file path where data are saved
+**(Time Tracker & Reminder) Open & show data file** - Opens and shows file where data are saved
 
 **(Time Tracker & Reminder) Show log** - Shows time spend log for each day
 

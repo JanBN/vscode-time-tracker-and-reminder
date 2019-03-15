@@ -35,7 +35,8 @@ export class TimeTracker {
         vscode.commands.registerCommand('extension.clearAllData', () => this.clearAllData());
         vscode.commands.registerCommand('extension.toggleStop', () => this.toggleStop());
         vscode.commands.registerCommand('extension.showLog', () => this.showLogWebView());
-        vscode.commands.registerCommand('extension.showDataFilePath', () => {
+        vscode.commands.registerCommand('extension.showDataFile', () => {
+            vscode.workspace.openTextDocument(this._storage._globalStoragePath).then(doc => vscode.window.showTextDocument(doc))
             vscode.window.showInformationMessage(this._storage._globalStoragePath);
         });
 

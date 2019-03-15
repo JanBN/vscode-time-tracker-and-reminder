@@ -29,8 +29,8 @@
 				"title": "(Time Tracker & Reminder) Toggle stop"
 			},
 			{
-				"command": "extension.showDataFilePath",
-				"title": "(Time Tracker & Reminder) Show data file path"
+				"command": "extension.showDataFile",
+				"title": "(Time Tracker & Reminder) Open & show data file"
 			},
 			{
 				"command": "extension.showLog",
