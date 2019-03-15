@@ -115,12 +115,17 @@ export class TimeTracker {
         this._config = workspace.getConfiguration('time-tracker');
         this.initReminders();
         this.recomputeStatusBar();
+        this.setStatusBarCommand();
     }
 
     private createStatusBars() {
         this._statusBarItem = window.createStatusBarItem(StatusBarAlignment.Left);
-        this._statusBarItem.command = 'extension.toggleStop';
+        this.setStatusBarCommand();
         this._statusBarItem.show();
+    }
+
+    private setStatusBarCommand() {
+        this._statusBarItem.command = this._config.onStatusbarBarClick == "show log" ? 'extension.showLog' : 'extension.toggleStop';
     }
 
     private recomputeStatusBar(): void {

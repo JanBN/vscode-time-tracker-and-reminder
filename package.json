@@ -49,27 +49,36 @@
 				"time-tracker.showTotalTime": {
 					"type": "boolean",
 					"default": false,
-					"description": "Show total time in toolbar"
+					"description": "Show total time in status bar"
 				},
 				"time-tracker.showTotalWorkspaceTime": {
 					"type": "boolean",
 					"default": false,
-					"description": "Show total workspace time in toolbar"
+					"description": "Show total workspace time in status bar"
 				},
 				"time-tracker.showTodayTime": {
 					"type": "boolean",
 					"default": true,
-					"description": "Show total today time in toolbar"
+					"description": "Show total today time in status bar"
 				},
 				"time-tracker.showFromStartTime": {
 					"type": "boolean",
 					"default": true,
-					"description": "Show from start time in toolbar"
+					"description": "Show from start time in status bar"
+				},
+				"time-tracker.onStatusbarBarClick": {
+					"type": "string",
+					"enum": [
+						"stop time tracking",
+						"show log"
+					],
+					"default": "show log",
+					"description": "Status bar click action"
 				},
 				"time-tracker.showNextReminder": {
 					"type": "boolean",
 					"default": "true",
-					"description": "Show next reminder in toolbar"
+					"description": "Show next reminder in status bar"
 				}
 			}
 		}
