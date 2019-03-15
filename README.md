@@ -39,7 +39,7 @@ Track your time using vscode editor, see log, and remind you pauses for blinking
 "time-tracker.showTotalTime": false
 "time-tracker.showTotalWorkspaceTime": false,
 "time-tracker.showTodayTime": true,
-"time-tracker.showFromStartTime": true,
+"time-tracker.showFromStartTime": false,
 "time-tracker.showNextReminder": true,
 "time-tracker.onStatusbarBarClick": "show log" // possible values: "show log", "stop time tracking"
 ```

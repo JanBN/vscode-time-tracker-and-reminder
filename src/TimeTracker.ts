@@ -167,7 +167,7 @@ export class TimeTracker {
         if (totalDurationText.length > 0 && this._config.showTotalTime) texts.push(totalDurationText);
         if (totalWorkspaceText.length > 0 && this._config.showTotalWorkspaceTime) texts.push(totalWorkspaceText);
         if (todayDuration.length > 0 && this._config.showTodayTime) texts.push(todayDuration);
-        if (fromStartDurationText.length > 0) texts.push(fromStartDurationText);
+        if (fromStartDurationText.length > 0 && this._config.showFromStartTime) texts.push(fromStartDurationText);
         if (nextReminderText.length > 0 && this._config.showNextReminder) texts.push(nextReminderText);
 
         this._statusBarItem.text = iconText + texts.join(" | ");

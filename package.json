@@ -63,7 +63,7 @@
 				},
 				"time-tracker.showFromStartTime": {
 					"type": "boolean",
-					"default": true,
+					"default": false,
 					"description": "Show from start time in status bar"
 				},
 				"time-tracker.onStatusbarBarClick": {
