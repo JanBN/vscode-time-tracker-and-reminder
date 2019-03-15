@@ -2,6 +2,8 @@
 
 Track your time using vscode editor, see log, and remind you pauses for blinking, standing up, or whatever
 
+![](https://github.com/JanBN/vscode-time-tracker-and-reminder/blob/master/assets/demo.gif)
+
 
 ## Features
 
@@ -88,7 +90,4 @@ There is a timer running every minute to update status bar. When the time until 
 When running multiple instances of vscode it finds intersected time intervals and consolidates them (joins them to one, with min start and max end). It means it counts should be counting spent time correctly even when running multiple instances of vscode.
 
 
-
-![](https://github.com/JanBN/vscode-time-tracker-and-reminder/blob/master/assets/demo.gif)
-
-<div>Icons made by <a href="https://www.flaticon.com/authors/ocha" title="OCHA">OCHA</a> from <a href="https://www.flaticon.com/" 			    title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" 			    title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>
+<div>Icons made by <a href="https://www.freepik.com/" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" 			    title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" 			    title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>
