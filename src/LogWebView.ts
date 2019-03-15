@@ -29,12 +29,12 @@ export class LogWebView {
     this._panel.webview.html = this.getWebviewContent();
   }
 
-  private getAllTimeIntervals() {
+  private getThisYearAllTimeIntervals() {
     return this._storage.getAllTimeIntervals();
   }
 
   private getAverageDayTimeString() {
-    const timeIntervals = this.getAllTimeIntervals();
+    const timeIntervals = this.getThisYearAllTimeIntervals();
     if (timeIntervals && timeIntervals.length > 0) {
       const dayTimeIntervals = [];
       let daysCount = 0;
@@ -56,14 +56,13 @@ export class LogWebView {
     return 0;
   }
 
-  private getTimeIntervals(timeFrom: number, timeTo: number) {
-    const allTimeIntervals = this.getAllTimeIntervals();
-    const result = allTimeIntervals.filter(x => x.start >= timeFrom && x.end <= timeTo);
+  private getTimeIntervals(timeIntervals: TimeInterval[], timeFrom: number, timeTo: number) {
+    const result = timeIntervals.filter(x => x.start >= timeFrom && x.start <= timeTo);
     return result;
   }
 
-  private getTimeSum(timeFrom: number, timeTo: number) {
-    const timeIntervals = this.getTimeIntervals(timeFrom, timeTo);
+  private getTimeSum(allTimeIntervals: TimeInterval[], timeFrom: number, timeTo: number) {
+    const timeIntervals = this.getTimeIntervals(allTimeIntervals, timeFrom, timeTo);
     const timeIntervalsDuration = timeIntervals.map(x => x.end - x.start);
     const sum = timeIntervalsDuration && timeIntervalsDuration.length > 0 ? timeIntervalsDuration.reduce((accumulator, currentValue) => accumulator + currentValue) : 0;
 
@@ -83,83 +82,114 @@ export class LogWebView {
 
   private getYearHtmlData(year: number, timeIntervals: TimeInterval[]): string {
 
-    const dayTimeIntervals = {};
+    const dayTableRows = this.getYearDateData(timeIntervals, "day", "YYYY-MM-DD dddd", "Day");
+    const monthTableRows = this.getYearDateData(timeIntervals, "month", "MMMM", "Month");
 
+    const monthNames = [];
+    const monthMilliseconds = [];
+    const startOfyear = moment(new Date(year, 1, 1)).startOf('year');
+    for (let i = 0; i < 12; i++) {
+
+      const monthStart = startOfyear.clone().add(i, "month");
+      const monthEnd = startOfyear.clone().add(i + 1, "month");
+
+      monthNames.push(monthStart.format('MMMM'));
+      monthMilliseconds.push(this.getTimeSum(timeIntervals, monthStart.valueOf(), monthEnd.valueOf()));
+    }
+
+    return `<h2> ${year} </h2>
+
+    <p>
+    <h3> Months </h3>
+        <table class="rtable">
+          <thead>
+            <tr>
+              ${monthNames.map(x => "<th><b>" + x + "</b> </th>").join("")}          
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr>
+              ${monthMilliseconds.map(x => "<td>" + formatTimeFromMiliseconds(x) + " </td>").join("")}
+            </tr>
+          </tbody>
+        </table>
+        </p>
+
+        <p>
+        <table class="rtable">
+          <tbody>
+            ${monthTableRows.join("")}
+          </tbody>
+        </table>
+        </p>
+
+        <p>
+        <h3> Days </h3>
+        <table class="rtable">
+          <tbody>
+            ${dayTableRows.join("")}
+          </tbody>
+        </table>
+        </p>
+        `;
+  }
+
+  private getYearDateData(timeIntervals: TimeInterval[], momentStartOfTextValue:moment.unitOfTime.StartOf, momentDateFormat:string, tableDateLabel:string) {
+    const dateTimeIntervals = {};
     timeIntervals.forEach(x => {
-      const dateStart = moment(x.start).startOf('day').valueOf();
-      // const dateEnd = moment(x.start).endOf('day').valueOf();
+      const dateStart = moment(x.start).startOf(momentStartOfTextValue).valueOf();
 
-      if (!dayTimeIntervals[dateStart]) {
-        dayTimeIntervals[dateStart] = [];
+      
+      if (!dateTimeIntervals[dateStart]) {
+        dateTimeIntervals[dateStart] = [];
       }
-
-      dayTimeIntervals[dateStart].push(x);
+      dateTimeIntervals[dateStart].push(x);
     });
-
     const tableRows = [];
-    for (var key in dayTimeIntervals) {
+    for (var key in dateTimeIntervals) {
       const keyNumber = +key;
-      let dayString = moment(keyNumber).format("YYYY-MM-DD dddd");
-
-      const timeIntervals: TimeInterval[] = dayTimeIntervals[key];
+      let dateString = moment(keyNumber).format(momentDateFormat);
+      const timeIntervals: TimeInterval[] = dateTimeIntervals[key];
       const totalDayTimeMillisecondsArray = timeIntervals.map(x => x.end - x.start);
       const totalDaySum = totalDayTimeMillisecondsArray && totalDayTimeMillisecondsArray.length > 0 ? totalDayTimeMillisecondsArray.reduce((accumulator, currentValue) => accumulator + currentValue) : 0;
-      const totalDayString = formatTimeFromMiliseconds(totalDaySum);
-
+      const totalDateString = formatTimeFromMiliseconds(totalDaySum);
       const grouppedByWorkspace = this.groupBy(timeIntervals, 'workspace');
-
-      tableRows.push(
-        `
+      tableRows.push(`
         <tr>
-          <td style="min-width: 100px;"><b>Day</b></td>
+          <td style="min-width: 100px;"><b>${tableDateLabel}  </b></td>
           <td style="min-width: 100px;"><b>Worspace</b></td> 
           <td style="min-width: 100px;"><b>Time</b></td> 
         </tr>
   
-        `
-      );
-
+        `);
       for (var key in grouppedByWorkspace) {
         const workspaceName = key;
         const grouppedIntervals: TimeInterval[] = grouppedByWorkspace[key];
         const workspaceMillisecondsArray = grouppedIntervals.map(x => x.end - x.start);
         const workspaceSum = workspaceMillisecondsArray && workspaceMillisecondsArray.length > 0 ? workspaceMillisecondsArray.reduce((accumulator, currentValue) => accumulator + currentValue) : 0;
         const workspaceSumString = formatTimeFromMiliseconds(workspaceSum);
-
-        tableRows.push(
-          `
+        tableRows.push(`
           <tr>
-            <td style="min-width: 100px;"><b>${dayString }</b></td>
+            <td style="min-width: 100px;"><b>${dateString}</b></td>
             <td style="min-width: 100px;">${workspaceName}</td> 
             <td style="min-width: 100px;">${workspaceSumString}</td> 
           </tr>
-          `
-        );
-
-        dayString = ""; // clear date string so it is shwon only the first time
+          `);
+        dateString = ""; // clear date string so it is shwon only the first time
       }
-
-
-      tableRows.push(
-        `
+      tableRows.push(`
           <tr>
             <td style="min-width: 100px;"></td>
             <td style="min-width: 100px;"><b>Total</b></td> 
-            <td style="min-width: 100px;"><b>${totalDayString}</b></td> 
+            <td style="min-width: 100px;"><b>${totalDateString}</b></td> 
           </tr>
-          `
-      );
+          `);
     }
-
-    return `<h2> ${year} </h2>
-        <table class="rtable">
-          <tbody>
-            ${
-      tableRows.join("")
-      }
-          </tbody>
-        </table>`;
+    return tableRows;
   }
+
+
 
   private getLastYearPaths() {
     let year = new Date().getUTCFullYear() - 1;
@@ -187,12 +217,13 @@ export class LogWebView {
     const today = moment().startOf('day');
     const yesterday = today.clone().subtract(1, 'days');
 
-    const yesterdayMilliseconds = this.getTimeSum(yesterday.valueOf(), today.valueOf());
-    const last7DaysMilliseconds = this.getTimeSum(today.clone().subtract(7, 'days').valueOf(), today.valueOf());
-    const thisWeekMilliseconds = this.getTimeSum(today.clone().subtract(7, 'days').valueOf(), today.valueOf());
-    const lastWeekMilliseconds = this.getTimeSum(today.clone().subtract(7, 'days').startOf('week').valueOf(), today.clone().subtract(7, 'days').endOf('week').valueOf());
-    const thisMonthMilliseconds = this.getTimeSum(today.clone().startOf('month').valueOf(), today.clone().endOf('month').valueOf());
-    const lastMonthMilliseconds = this.getTimeSum(today.clone().subtract(1, 'months').startOf('month').valueOf(), today.clone().subtract(1, 'months').endOf('month').valueOf());
+    const timeIntervals = this.getThisYearAllTimeIntervals();
+    const yesterdayMilliseconds = this.getTimeSum(timeIntervals, yesterday.valueOf(), today.valueOf());
+    const last7DaysMilliseconds = this.getTimeSum(timeIntervals, today.clone().subtract(7, 'days').valueOf(), today.valueOf());
+    const thisWeekMilliseconds = this.getTimeSum(timeIntervals, today.clone().subtract(7, 'days').valueOf(), today.valueOf());
+    const lastWeekMilliseconds = this.getTimeSum(timeIntervals, today.clone().subtract(7, 'days').startOf('week').valueOf(), today.clone().subtract(7, 'days').endOf('week').valueOf());
+    const thisMonthMilliseconds = this.getTimeSum(timeIntervals, today.clone().startOf('month').valueOf(), today.clone().endOf('month').valueOf());
+    const lastMonthMilliseconds = this.getTimeSum(timeIntervals, today.clone().subtract(1, 'months').startOf('month').valueOf(), today.clone().subtract(1, 'months').endOf('month').valueOf());
 
     return `<!DOCTYPE html> <html lang="en">
     <head>
@@ -235,7 +266,7 @@ export class LogWebView {
                 </tbody>
             </table>
             
-            ${this.getYearHtmlData(new Date().getFullYear(), this.getAllTimeIntervals())}
+            ${this.getYearHtmlData(new Date().getFullYear(), this.getThisYearAllTimeIntervals())}
             ${this.getLastYearPaths()}
            
         </body>  
