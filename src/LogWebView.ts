@@ -120,8 +120,8 @@ export class LogWebView {
 
     return `<h2> ${year} </h2>
 
-    <h3 class="collapsible"> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> Days</h3>
-        <div class="content">
+    <h3 class="collapsible active"> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> Days</h3>
+        <div class="content" style="display:block">
           <table class="rtable">
             <tbody>
               ${dayTableRows.join("")}
