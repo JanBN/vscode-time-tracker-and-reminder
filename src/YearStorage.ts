@@ -6,7 +6,7 @@ import { TimeInterval } from './interfaces';
 import { getStorageFilePath } from './PathUtils';
 import { hasIntersection, getTimeIntervalsCroppedToTimeRange } from './TimeIntervalUtils';
 
-export class Storage {
+export class YearStorage {
 
   _globalStoragePath: string;
   context: vscode.ExtensionContext;

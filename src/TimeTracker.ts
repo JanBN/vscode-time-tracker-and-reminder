@@ -3,7 +3,7 @@
 import 'moment-duration-format';
 import { StatusBarAlignment, StatusBarItem, window, workspace } from 'vscode';
 import { Reminder, TimeInterval } from './interfaces';
-import { Storage } from './Storage';
+import { YearStorage } from './YearStorage';
 import * as vscode from 'vscode';
 import { LogWebView } from './LogWebView';
 import { formatTimeFromMiliseconds, formatTime } from './TimeFormat';
@@ -16,7 +16,7 @@ export class TimeTracker {
     _invervalId: NodeJS.Timer;
     _reminders: Reminder[] = [];
     _currentTimeInterval: TimeInterval = null;
-    _storage: Storage = null;
+    _storage: YearStorage = null;
     _config = workspace.getConfiguration('time-tracker');
     _startAppIntervals: TimeInterval[] = [];
     _isStopped: boolean = false;
@@ -24,7 +24,7 @@ export class TimeTracker {
 
     constructor(context: vscode.ExtensionContext) {
         this._context = context;
-        this._storage = new Storage(this._context);
+        this._storage = new YearStorage(this._context);
 
         this.startCurrentTimenterval();
         this.initReminders();

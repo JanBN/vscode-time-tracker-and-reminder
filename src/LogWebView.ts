@@ -1,6 +1,6 @@
 import * as moment from 'moment';
 import * as vscode from 'vscode';
-import { Storage } from './Storage';
+import { YearStorage } from './YearStorage';
 import { formatTimeFromMiliseconds } from './TimeFormat';
 import { TimeInterval } from './interfaces';
 import { getStorageFilePath } from './PathUtils';
@@ -14,11 +14,11 @@ interface WorkspaceTimeIntervals {
 
 export class LogWebView {
   _context: vscode.ExtensionContext;
-  _storage: Storage;
+  _storage: YearStorage;
   _panel: vscode.WebviewPanel;
   _currentTimeInterval: TimeInterval;
 
-  constructor(context: vscode.ExtensionContext, storage: Storage, currentTimeInterval: TimeInterval) {
+  constructor(context: vscode.ExtensionContext, storage: YearStorage, currentTimeInterval: TimeInterval) {
     this._context = context;
     this._storage = storage;
     this._currentTimeInterval = Object.assign({}, currentTimeInterval);
@@ -171,14 +171,30 @@ export class LogWebView {
   private getTimePeriodDateData(timeIntervals: TimeInterval[], startOfResolution: moment.unitOfTime.StartOf, timerangeResolution: moment.unitOfTime.DurationConstructor, momentDateFormat: string, tableDateLabel: string) {
     const dateTimeIntervals = {};
     timeIntervals.forEach(x => {
-      const dateStart = moment(x.start).startOf(startOfResolution).valueOf();
-      const dateEnd = moment(x.start).startOf(startOfResolution).add(1, timerangeResolution).valueOf();
 
-      if (!dateTimeIntervals[dateStart]) {
-        dateTimeIntervals[dateStart] = [];
+      // because of intersected intervals, need to check in which others it belongs to
+      let croppedDateInterval: TimeInterval = null;
+      let iteration = 0;
+      while (true) {
+        const dateStart = moment(x.start).startOf(startOfResolution).add(iteration, timerangeResolution).valueOf();
+        const dateEnd = moment(x.end).startOf(startOfResolution).add(iteration + 1, timerangeResolution).valueOf();
+
+        croppedDateInterval = getTimeIntervalCroppedToTimeRange(x, dateStart, dateEnd);
+        if (!croppedDateInterval) {
+          break;
+        }
+
+        const key = moment(croppedDateInterval.start).startOf(startOfResolution).valueOf();
+
+        if (!dateTimeIntervals[key]) {
+          dateTimeIntervals[key] = [];
+        }
+        dateTimeIntervals[key].push(croppedDateInterval);
+
+        iteration++;
       }
-      dateTimeIntervals[dateStart].push(getTimeIntervalCroppedToTimeRange(x, dateStart, dateEnd));
     });
+    
     const tableRows = [];
     tableRows.push(`
     <tr>
@@ -235,7 +251,7 @@ export class LogWebView {
 
 
 
-  private getLastYearHtmlData() {
+  private getLastYearsHtmlData() {
     let year = new Date().getUTCFullYear() - 1;
     let result = "";
 
@@ -309,7 +325,7 @@ export class LogWebView {
             </table>
             
             ${this.getYearHtmlData(new Date().getFullYear(), this.getThisYearAllTimeIntervals())}
-            ${this.getLastYearHtmlData()}
+            ${this.getLastYearsHtmlData()}
            
 
             <script>
