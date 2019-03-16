@@ -5,15 +5,21 @@ import { formatTimeFromMiliseconds } from './TimeFormat';
 import { TimeInterval } from './interfaces';
 import { getStorageFilePath } from './PathUtils';
 import * as fs from "fs";
+import { getTimeIntervalCroppedToTimeRange, getTimeIntervalsCroppedToTimeRange } from './TimeIntervalUtils';
 
 export class LogWebView {
   _context: vscode.ExtensionContext;
   _storage: Storage;
   _panel: vscode.WebviewPanel;
+  _currentTimeInterval: TimeInterval;
 
-  constructor(context: vscode.ExtensionContext, storage: Storage) {
+  constructor(context: vscode.ExtensionContext, storage: Storage, currentTimeInterval: TimeInterval) {
     this._context = context;
     this._storage = storage;
+    this._currentTimeInterval = Object.assign({}, currentTimeInterval);
+    if (!this._currentTimeInterval.end) {
+      this._currentTimeInterval.end = Date.now();
+    }
 
     this.init();
   }
@@ -30,39 +36,53 @@ export class LogWebView {
   }
 
   private getThisYearAllTimeIntervals() {
-    return this._storage.getAllTimeIntervals();
+    const allTimeIntervals = this._storage.getAllTimeIntervals().slice();
+    if (this._currentTimeInterval) {
+      allTimeIntervals.push(this._currentTimeInterval);
+    }
+
+    return allTimeIntervals;
   }
 
   private getAverageDayTimeString() {
     const timeIntervals = this.getThisYearAllTimeIntervals();
     if (timeIntervals && timeIntervals.length > 0) {
-      const dayTimeIntervals = [];
-      let daysCount = 0;
       let totalSum = 0;
+      const usedDays = [];
       timeIntervals.forEach(x => {
         const dateStart = moment(x.start).startOf('day').valueOf();
+        const dayEnd = moment(x.start).startOf('day').add(1, "days").valueOf();
 
-        if (dayTimeIntervals.indexOf(dateStart) < 0) {
-          dayTimeIntervals.push(dateStart);
-          daysCount++;
+        const croppedTimeInterval = getTimeIntervalCroppedToTimeRange(x, dateStart, dayEnd);
+
+        if (croppedTimeInterval != null) {
+          if (usedDays.indexOf(dateStart) < 0) {
+            usedDays.push(dateStart);
+          }
+          totalSum += croppedTimeInterval.end - croppedTimeInterval.start;
         }
-
-        totalSum += x.end - x.start;
       });
 
-      return formatTimeFromMiliseconds(Math.floor(totalSum / daysCount));
+      return formatTimeFromMiliseconds(Math.floor(totalSum / usedDays.length));
     }
 
     return 0;
   }
 
-  private getTimeIntervals(timeIntervals: TimeInterval[], timeFrom: number, timeTo: number) {
-    const result = timeIntervals.filter(x => x.start >= timeFrom && x.start <= timeTo);
-    return result;
+  // private getTimeIntervals(timeIntervals: TimeInterval[], timeFrom: number, timeTo: number) {
+  //   const result = timeIntervals.filter(x => x.start >= timeFrom && x.start <= timeTo);
+  //   return result;
+  // }
+
+  private getItervalsSum(intervals: TimeInterval[]) {
+    const timeIntervalsDuration = intervals.map(x => x.end - x.start);
+    const sum = timeIntervalsDuration && timeIntervalsDuration.length > 0 ? timeIntervalsDuration.reduce((accumulator, currentValue) => accumulator + currentValue) : 0;
+
+    return sum;
   }
 
   private getTimeSum(allTimeIntervals: TimeInterval[], timeFrom: number, timeTo: number) {
-    const timeIntervals = this.getTimeIntervals(allTimeIntervals, timeFrom, timeTo);
+    const timeIntervals = getTimeIntervalsCroppedToTimeRange(allTimeIntervals, timeFrom, timeTo);
     const timeIntervalsDuration = timeIntervals.map(x => x.end - x.start);
     const sum = timeIntervalsDuration && timeIntervalsDuration.length > 0 ? timeIntervalsDuration.reduce((accumulator, currentValue) => accumulator + currentValue) : 0;
 
@@ -81,9 +101,9 @@ export class LogWebView {
   }
 
   private getYearHtmlData(year: number, timeIntervals: TimeInterval[]): string {
-
-    const dayTableRows = this.getYearDateData(timeIntervals, "day", "YYYY-MM-DD dddd", "Day");
-    const monthTableRows = this.getYearDateData(timeIntervals, "month", "MMMM", "Month");
+    const dayTableRows = this.getTimePeriodDateData(timeIntervals, "day", "days", "YYYY-MM-DD dddd", "Day");
+    const monthTableRows = this.getTimePeriodDateData(timeIntervals, "month", "months", "MMMM", "Month");
+    const weekTableRows = this.getTimePeriodDateData(timeIntervals, "week", "weeks", "w", "Week");
 
     const monthNames = [];
     const monthMilliseconds = [];
@@ -94,7 +114,8 @@ export class LogWebView {
       const monthEnd = startOfyear.clone().add(i + 1, "month");
 
       monthNames.push(monthStart.format('MMMM'));
-      monthMilliseconds.push(this.getTimeSum(timeIntervals, monthStart.valueOf(), monthEnd.valueOf()));
+      const monthSum = this.getItervalsSum(getTimeIntervalsCroppedToTimeRange(timeIntervals, monthStart.valueOf(), monthEnd.valueOf()));
+      monthMilliseconds.push(monthSum);
     }
 
     return `<h2> ${year} </h2>
@@ -116,44 +137,56 @@ export class LogWebView {
         </table>
         </p>
 
-        <p>
-        <table class="rtable">
-          <tbody>
-            ${monthTableRows.join("")}
-          </tbody>
-        </table>
-        </p>
+        <h3>Months</h3>
+          <div class="content222">
+            <table class="rtable">
+              <tbody>
+                ${monthTableRows.join("")}
+              </tbody>
+            </table>
+          </div>
 
-        <p>
-        <h3> Days </h3>
-        <table class="rtable">
-          <tbody>
-            ${dayTableRows.join("")}
-          </tbody>
-        </table>
-        </p>
+        <h3>Weeks</h3>
+        <div class="content222">
+          <table class="rtable">
+            <tbody>
+              ${weekTableRows.join("")}
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Days</h3>
+        <div class="content22">
+          <table class="rtable">
+            <tbody>
+              ${dayTableRows.join("")}
+            </tbody>
+          </table>
+        </div>
+
+    
         `;
   }
 
-  private getYearDateData(timeIntervals: TimeInterval[], momentStartOfTextValue:moment.unitOfTime.StartOf, momentDateFormat:string, tableDateLabel:string) {
+  private getTimePeriodDateData(timeIntervals: TimeInterval[], startOfResolution: moment.unitOfTime.StartOf, timerangeResolution: moment.unitOfTime.DurationConstructor, momentDateFormat: string, tableDateLabel: string) {
     const dateTimeIntervals = {};
     timeIntervals.forEach(x => {
-      const dateStart = moment(x.start).startOf(momentStartOfTextValue).valueOf();
+      const dateStart = moment(x.start).startOf(startOfResolution).valueOf();
+      const dateEnd = moment(x.start).startOf(startOfResolution).add(1, timerangeResolution).valueOf();
 
-      
       if (!dateTimeIntervals[dateStart]) {
         dateTimeIntervals[dateStart] = [];
       }
-      dateTimeIntervals[dateStart].push(x);
+      dateTimeIntervals[dateStart].push(getTimeIntervalCroppedToTimeRange(x, dateStart, dateEnd));
     });
     const tableRows = [];
     for (var key in dateTimeIntervals) {
       const keyNumber = +key;
       let dateString = moment(keyNumber).format(momentDateFormat);
       const timeIntervals: TimeInterval[] = dateTimeIntervals[key];
-      const totalDayTimeMillisecondsArray = timeIntervals.map(x => x.end - x.start);
-      const totalDaySum = totalDayTimeMillisecondsArray && totalDayTimeMillisecondsArray.length > 0 ? totalDayTimeMillisecondsArray.reduce((accumulator, currentValue) => accumulator + currentValue) : 0;
-      const totalDateString = formatTimeFromMiliseconds(totalDaySum);
+      const totalDateTimeMillisecondsArray = timeIntervals.map(x => x.end - x.start);
+      const totalDateSum = totalDateTimeMillisecondsArray && totalDateTimeMillisecondsArray.length > 0 ? totalDateTimeMillisecondsArray.reduce((accumulator, currentValue) => accumulator + currentValue) : 0;
+      const totalDateString = formatTimeFromMiliseconds(totalDateSum);
       const grouppedByWorkspace = this.groupBy(timeIntervals, 'workspace');
       tableRows.push(`
         <tr>
@@ -171,13 +204,14 @@ export class LogWebView {
         const workspaceSumString = formatTimeFromMiliseconds(workspaceSum);
         tableRows.push(`
           <tr>
-            <td style="min-width: 100px;"><b>${dateString}</b></td>
-            <td style="min-width: 100px;">${workspaceName}</td> 
+            <td style="width: 150px;"><b>${dateString}</b></td>
+            <td style="width: 500px;">${workspaceName}</td> 
             <td style="min-width: 100px;">${workspaceSumString}</td> 
           </tr>
           `);
         dateString = ""; // clear date string so it is shwon only the first time
       }
+
       tableRows.push(`
           <tr>
             <td style="min-width: 100px;"></td>
@@ -275,10 +309,51 @@ export class LogWebView {
 
   getStyles() {
 
-    const color = new vscode.ThemeColor('editor.foreground');
-    const thBackground = new vscode.ThemeColor('editorGutter.background');
+    const result = `   
+    
+    <script>
+      var coll = document.getElementsByClassName("collapsible");
+      var i;
+      
+      for (i = 0; i < coll.length; i++) {
+        coll[i].addEventListener("click", function() {
+          this.classList.toggle("active");
+          var content = this.nextElementSibling;
+          if (content.style.display === "block") {
+            content.style.display = "none";
+          } else {
+            content.style.display = "block";
+          }
+        });
+      }
+    </script>
 
-    const result = `    <style>
+    <style>
+
+    .collapsible {
+      background-color: #777;
+      color: white;
+      cursor: pointer;
+      padding: 18px;
+      width: 100%;
+      border: none;
+      text-align: left;
+      outline: none;
+      font-size: 15px;
+    }
+    
+    .active, .collapsible:hover {
+      background-color: #555;
+    }
+    
+    .content {
+      padding: 0 18px;
+      display: none;
+      overflow: hidden;
+      background-color: #f1f1f1;
+    }
+
+
   .rtable {
       /*!
   // IE needs inline-block to position scrolling shadows otherwise use:
@@ -333,7 +408,6 @@ export class LogWebView {
       font-size: 11px;
       text-align: left;
       text-transform: uppercase;
-      background: ${thBackground};
   }
 
   .rtable th,
@@ -392,7 +466,7 @@ export class LogWebView {
   body {
       margin: 0;
       padding: 25px;
-      color: ${color};
+      
       font-size: 14px;
       line-height: 20px;
   }

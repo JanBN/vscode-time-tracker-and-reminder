@@ -356,7 +356,7 @@ export class TimeTracker {
     }
 
     private showLogWebView() {
-        new LogWebView(this._context, this._storage);
+        new LogWebView(this._context, this._storage, !this._currentTimeInterval.end ? this._currentTimeInterval : null);
     }
 
     dispose() {
@@ -365,6 +365,4 @@ export class TimeTracker {
         this._storage.saveAll();
         this._statusBarItem.dispose();
     }
-
-
 }

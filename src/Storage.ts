@@ -4,6 +4,7 @@ import * as fs from "fs";
 
 import { TimeInterval } from './interfaces';
 import { getStorageFilePath } from './PathUtils';
+import { hasIntersection, getTimeIntervalsCroppedToTimeRange } from './TimeIntervalUtils';
 
 export class Storage {
 
@@ -47,7 +48,7 @@ export class Storage {
         if (i1 == i2) {
           continue;
         }
-        if (this.hasIntersection(interval1, interval2)) {
+        if (hasIntersection(interval1, interval2.start, interval2.end)) {
           intersectedElements.push(interval2);
         }
       }
@@ -55,10 +56,10 @@ export class Storage {
       if (intersectedElements.length > 0) {
         const delimiter = "; ";
         resultIntervals = resultIntervals.filter(x => !intersectedElements.some(y => y == x));
-        const workspacesSomeWithDelimitedStrings = new Set(resultIntervals.map(x => x.workspace));        
+        const workspacesSomeWithDelimitedStrings = new Set(resultIntervals.map(x => x.workspace));
         const arrayOfArrays = [...workspacesSomeWithDelimitedStrings].map(x => x.split(delimiter));
         const flatArrayOFWorkspaces = [].concat.apply([], arrayOfArrays)
-        
+
         const newInterval: TimeInterval =
         {
           workspace: [... new Set(flatArrayOFWorkspaces)].join(delimiter),
@@ -71,11 +72,6 @@ export class Storage {
     }
 
     return resultIntervals;
-  }
-
-  hasIntersection(interval1: TimeInterval, interval2: TimeInterval): Boolean {
-    const result = (interval1.start == interval2.start) || (interval1.start > interval2.start ? interval1.start < interval2.end : interval2.start < interval1.end);
-    return result;
   }
 
   ensureStoragePath(path: string) {
@@ -95,14 +91,18 @@ export class Storage {
     return this._totalDurationMiliseconds;
   }
 
+
   public get todayDurationMiliseconds() {
     if (this._todayDurationMiliseconds) {
       return this._todayDurationMiliseconds;
     }
 
     const startOfTodayMiliseconds = moment().startOf('day').valueOf();
-    const timeIntervals = [...this._savedTimeIntervals, ...this._newTimeIntervals];
-    const milisecondsArray: number[] = timeIntervals.filter(x => x.start > startOfTodayMiliseconds || x.end > startOfTodayMiliseconds).map(x => x.end - x.start);
+    const endOfTodayMiliseconds = moment().startOf('day').add(1, 'days').valueOf();
+
+    const timeIntervals = [...this._savedTimeIntervals, ...this._newTimeIntervals].filter(x => !(x.end < startOfTodayMiliseconds));
+    const milisecondsArray: number[] = getTimeIntervalsCroppedToTimeRange(timeIntervals, startOfTodayMiliseconds, endOfTodayMiliseconds).map(x => x.end - x.start);
+
     this._todayDurationMiliseconds = milisecondsArray && milisecondsArray.length > 0 ? milisecondsArray.reduce((accumulator, currentValue) => accumulator + currentValue) : 0;
     return this._todayDurationMiliseconds;
   }
