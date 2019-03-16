@@ -7,6 +7,11 @@ import { getStorageFilePath } from './PathUtils';
 import * as fs from "fs";
 import { getTimeIntervalCroppedToTimeRange, getTimeIntervalsCroppedToTimeRange } from './TimeIntervalUtils';
 
+interface WorkspaceTimeIntervals {
+  workspaceName: string;
+  timeIntervals: TimeInterval[]
+}
+
 export class LogWebView {
   _context: vscode.ExtensionContext;
   _storage: Storage;
@@ -101,7 +106,7 @@ export class LogWebView {
     const weekTableRows = this.getTimePeriodDateData(timeIntervals, "week", "weeks", "w", "Week");
 
     const yearSum = this.getItervalsSum(getTimeIntervalsCroppedToTimeRange(timeIntervals, moment(new Date(year, 1, 1)).startOf('year').valueOf(), moment(new Date(year, 1, 1)).endOf('year').valueOf()));
-    
+
 
     const monthNames = [];
     const monthMilliseconds = [];
@@ -175,6 +180,13 @@ export class LogWebView {
       dateTimeIntervals[dateStart].push(getTimeIntervalCroppedToTimeRange(x, dateStart, dateEnd));
     });
     const tableRows = [];
+    tableRows.push(`
+    <tr>
+      <td style="min-width: 100px;"><b>${tableDateLabel}  </b></td>
+      <td style="min-width: 100px;"><b>Worspace</b></td> 
+      <td style="min-width: 100px;"><b>Time</b></td> 
+    </tr>
+    `);
     for (var key in dateTimeIntervals) {
       const keyNumber = +key;
       let dateString = moment(keyNumber).format(momentDateFormat);
@@ -183,18 +195,21 @@ export class LogWebView {
       const totalDateSum = totalDateTimeMillisecondsArray && totalDateTimeMillisecondsArray.length > 0 ? totalDateTimeMillisecondsArray.reduce((accumulator, currentValue) => accumulator + currentValue) : 0;
       const totalDateString = formatTimeFromMiliseconds(totalDateSum);
       const grouppedByWorkspace = this.groupBy(timeIntervals, 'workspace');
-      tableRows.push(`
-        <tr>
-          <td style="min-width: 100px;"><b>${tableDateLabel}  </b></td>
-          <td style="min-width: 100px;"><b>Worspace</b></td> 
-          <td style="min-width: 100px;"><b>Time</b></td> 
-        </tr>
-  
-        `);
+
+      const workspaceWithTimeIntervalsArray: WorkspaceTimeIntervals[] = [];
       for (var key in grouppedByWorkspace) {
-        const workspaceName = key;
-        const grouppedIntervals: TimeInterval[] = grouppedByWorkspace[key];
-        const workspaceMillisecondsArray = grouppedIntervals.map(x => x.end - x.start);
+        const obj = { workspaceName: key, timeIntervals: grouppedByWorkspace[key] };
+        workspaceWithTimeIntervalsArray.push(obj);
+      }
+
+      const sorted = workspaceWithTimeIntervalsArray.sort((a, b) => this.getItervalsSum(b.timeIntervals) - this.getItervalsSum(a.timeIntervals));
+      for (let i = 0; i < sorted.length; i++) {
+        const workspaceWithTimeIntervals = sorted[i];
+
+        const workspaceName = workspaceWithTimeIntervals.workspaceName;
+        const timeIntervals: TimeInterval[] = workspaceWithTimeIntervals.timeIntervals;
+
+        const workspaceMillisecondsArray = timeIntervals.map(x => x.end - x.start);
         const workspaceSum = workspaceMillisecondsArray && workspaceMillisecondsArray.length > 0 ? workspaceMillisecondsArray.reduce((accumulator, currentValue) => accumulator + currentValue) : 0;
         const workspaceSumString = formatTimeFromMiliseconds(workspaceSum);
         tableRows.push(`
