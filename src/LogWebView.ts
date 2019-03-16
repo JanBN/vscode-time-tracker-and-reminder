@@ -29,7 +29,7 @@ export class LogWebView {
       'time-tracker-log', // Identifies the type of the webview. Used internally
       'Time tracker log', // Title of the panel displayed to the user
       vscode.ViewColumn.One, // Editor column to show the new webview panel in.
-      {} // Webview options. More on these later.
+      {enableScripts: true} // Webview options. More on these later.
     );
 
     this._panel.webview.html = this.getWebviewContent();
@@ -41,7 +41,7 @@ export class LogWebView {
       allTimeIntervals.push(this._currentTimeInterval);
     }
 
-    return allTimeIntervals;
+    return allTimeIntervals.reverse();
   }
 
   private getAverageDayTimeString() {
@@ -120,43 +120,8 @@ export class LogWebView {
 
     return `<h2> ${year} </h2>
 
-    <p>
-    <h3> Months </h3>
-        <table class="rtable">
-          <thead>
-            <tr>
-              ${monthNames.map(x => "<th><b>" + x + "</b> </th>").join("")}          
-            </tr>
-          </thead>
-
-          <tbody>
-            <tr>
-              ${monthMilliseconds.map(x => "<td>" + formatTimeFromMiliseconds(x) + " </td>").join("")}
-            </tr>
-          </tbody>
-        </table>
-        </p>
-
-        <h3>Months</h3>
-          <div class="content222">
-            <table class="rtable">
-              <tbody>
-                ${monthTableRows.join("")}
-              </tbody>
-            </table>
-          </div>
-
-        <h3>Weeks</h3>
-        <div class="content222">
-          <table class="rtable">
-            <tbody>
-              ${weekTableRows.join("")}
-            </tbody>
-          </table>
-        </div>
-
-        <h3>Days</h3>
-        <div class="content22">
+    <h3 class="collapsible"> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> Days</h3>
+        <div class="content">
           <table class="rtable">
             <tbody>
               ${dayTableRows.join("")}
@@ -164,6 +129,37 @@ export class LogWebView {
           </table>
         </div>
 
+        <h3 class="collapsible"> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> Weeks</h3>
+        <div class="content">
+          <table class="rtable">
+            <tbody>
+              ${weekTableRows.join("")}
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="collapsible"> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> Months</h3>
+        <div class="content">
+          <table class="rtable">
+            <thead>
+              <tr>
+                ${monthNames.map(x => "<th><b>" + x + "</b> </th>").join("")}          
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                ${monthMilliseconds.map(x => "<td>" + formatTimeFromMiliseconds(x) + " </td>").join("")}
+              </tr>
+            </tbody>
+          </table>
+
+          <table class="rtable">
+            <tbody>
+              ${monthTableRows.join("")}
+            </tbody>
+          </table>
+        </div>
     
         `;
   }
@@ -225,7 +221,7 @@ export class LogWebView {
 
 
 
-  private getLastYearPaths() {
+  private getLastYearHtmlData() {
     let year = new Date().getUTCFullYear() - 1;
     let result = "";
 
@@ -237,7 +233,7 @@ export class LogWebView {
 
       const json = fs.readFileSync(filePath, "utf8");
       const timeIntervals = JSON.parse(json) as TimeInterval[];
-      result += this.getYearHtmlData(year, timeIntervals);
+      result += this.getYearHtmlData(year, timeIntervals.reverse());
 
       year--;
     } while (1 == 1)
@@ -301,56 +297,68 @@ export class LogWebView {
             </table>
             
             ${this.getYearHtmlData(new Date().getFullYear(), this.getThisYearAllTimeIntervals())}
-            ${this.getLastYearPaths()}
+            ${this.getLastYearHtmlData()}
            
+
+            <script>
+            var coll = document.getElementsByClassName("collapsible");
+            var i;
+            
+            for (i = 0; i < coll.length; i++) {
+              coll[i].addEventListener("click", function() {
+                this.classList.toggle("active");
+                var content = this.nextElementSibling;
+                if (content.style.display === "block") {
+                  content.style.display = "none";
+                } else {
+                  content.style.display = "block";
+                }
+              });
+            }
+          </script>
+
         </body>  
         </html>`;
   }
 
   getStyles() {
 
-    const result = `   
-    
-    <script>
-      var coll = document.getElementsByClassName("collapsible");
-      var i;
-      
-      for (i = 0; i < coll.length; i++) {
-        coll[i].addEventListener("click", function() {
-          this.classList.toggle("active");
-          var content = this.nextElementSibling;
-          if (content.style.display === "block") {
-            content.style.display = "none";
-          } else {
-            content.style.display = "block";
-          }
-        });
-      }
-    </script>
-
+    const result = `      
     <style>
 
+    .arrow-down
+    {
+      display:none;
+    }
+
+    .active > .arrow-down
+    {
+        display:inline;
+    }
+
+    .active > .arrow-right
+    {
+        display:none;
+    }
+
     .collapsible {
-      background-color: #777;
-      color: white;
       cursor: pointer;
-      padding: 18px;
+      padding: 10px;
+      padding-left:0px;
       width: 100%;
-      border: none;
+      border: 1px solid bottom;
       text-align: left;
       outline: none;
       font-size: 15px;
     }
     
     .active, .collapsible:hover {
-      background-color: #555;
+      font-weight:bold;
     }
     
     .content {
-      padding: 0 18px;
       display: none;
       overflow: hidden;
-      background-color: #f1f1f1;
     }
 
 
