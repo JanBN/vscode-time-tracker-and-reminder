@@ -46,7 +46,7 @@ export class LogWebView {
       allTimeIntervals.push(this._currentTimeInterval);
     }
 
-    return allTimeIntervals.reverse();
+    return allTimeIntervals.sort((a, b) => (b.end && a.end) ? b.end - a.end : b.start - a.start);
   }
 
   private getAverageDayTimeString() {
@@ -74,7 +74,7 @@ export class LogWebView {
     return 0;
   }
 
-  private getItervalsSum(intervals: TimeInterval[]) {
+  private getIntervalsSum(intervals: TimeInterval[]) {
     const timeIntervalsDuration = intervals.map(x => x.end - x.start);
     const sum = timeIntervalsDuration && timeIntervalsDuration.length > 0 ? timeIntervalsDuration.reduce((accumulator, currentValue) => accumulator + currentValue) : 0;
 
@@ -105,7 +105,7 @@ export class LogWebView {
     const monthTableRows = this.getTimePeriodDateData(timeIntervals, "month", "months", "MMMM", "Month");
     const weekTableRows = this.getTimePeriodDateData(timeIntervals, "week", "weeks", "w", "Week");
 
-    const yearSum = this.getItervalsSum(getTimeIntervalsCroppedToTimeRange(timeIntervals, moment(new Date(year, 1, 1)).startOf('year').valueOf(), moment(new Date(year, 1, 1)).endOf('year').valueOf()));
+    const yearSum = this.getIntervalsSum(getTimeIntervalsCroppedToTimeRange(timeIntervals, moment(new Date(year, 1, 1)).startOf('year').valueOf(), moment(new Date(year, 1, 1)).endOf('year').valueOf()));
 
 
     const monthNames = [];
@@ -117,7 +117,7 @@ export class LogWebView {
       const monthEnd = startOfyear.clone().add(i + 1, "month");
 
       monthNames.push(monthStart.format('MMMM'));
-      const monthSum = this.getItervalsSum(getTimeIntervalsCroppedToTimeRange(timeIntervals, monthStart.valueOf(), monthEnd.valueOf()));
+      const monthSum = this.getIntervalsSum(getTimeIntervalsCroppedToTimeRange(timeIntervals, monthStart.valueOf(), monthEnd.valueOf()));
       monthMilliseconds.push(monthSum);
     }
 
@@ -194,7 +194,7 @@ export class LogWebView {
         iteration++;
       }
     });
-    
+
     const tableRows = [];
     tableRows.push(`
     <tr>
@@ -218,7 +218,7 @@ export class LogWebView {
         workspaceWithTimeIntervalsArray.push(obj);
       }
 
-      const sorted = workspaceWithTimeIntervalsArray.sort((a, b) => this.getItervalsSum(b.timeIntervals) - this.getItervalsSum(a.timeIntervals));
+      const sorted = workspaceWithTimeIntervalsArray.sort((a, b) => this.getIntervalsSum(b.timeIntervals) - this.getIntervalsSum(a.timeIntervals));
       for (let i = 0; i < sorted.length; i++) {
         const workspaceWithTimeIntervals = sorted[i];
 

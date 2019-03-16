@@ -15,6 +15,7 @@ export class YearStorage {
   _totalDurationMiliseconds: number = null;
   _todayDurationMiliseconds: number = null;
   _totalWorkspaceMiliseconds: number = null;
+  _currentDayStart: number;
 
   constructor(context: vscode.ExtensionContext) {
     this.context = context;
@@ -91,14 +92,19 @@ export class YearStorage {
     return this._totalDurationMiliseconds;
   }
 
+  isDayChange() {
+    return moment().startOf('day').valueOf() != this._currentDayStart;
+  }
 
   public get todayDurationMiliseconds() {
-    if (this._todayDurationMiliseconds) {
+    if (this._todayDurationMiliseconds && !this.isDayChange()) {
       return this._todayDurationMiliseconds;
     }
 
     const startOfTodayMiliseconds = moment().startOf('day').valueOf();
     const endOfTodayMiliseconds = moment().startOf('day').add(1, 'days').valueOf();
+
+    this._currentDayStart = startOfTodayMiliseconds;
 
     const timeIntervals = [...this._savedTimeIntervals, ...this._newTimeIntervals].filter(x => !(x.end < startOfTodayMiliseconds));
     const milisecondsArray: number[] = getTimeIntervalsCroppedToTimeRange(timeIntervals, startOfTodayMiliseconds, endOfTodayMiliseconds).map(x => x.end - x.start);
