@@ -1,8 +1,6 @@
 import * as vscode from 'vscode';
 import * as moment from 'moment';
 import * as fs from "fs";
-import * as intersectingRanges from 'intersecting-Ranges'
-
 import { TimeInterval } from './interfaces';
 import { pathUtils } from './PathUtils';
 import { consolidator } from './Consolidator';
