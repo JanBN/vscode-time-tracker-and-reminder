@@ -93,6 +93,7 @@
 	"icon": "assets/icon.png",
 	"devDependencies": {
 		"@types/node": "^8.10.25",
+		"@types/mocha": "^2.2.42",
 		"ts-loader": "^4.4.2",
 		"tslint": "^5.8.0",
 		"typescript": "^3.3.3333",
@@ -101,6 +102,7 @@
 		"webpack-cli": "^3.1.0"
 	},
 	"dependencies": {
+		"intersecting-ranges": "^1.2.0",
 		"moment": "^2.22.2",
 		"moment-duration-format": "^2.2.2"
 	}

@@ -1,10 +1,12 @@
 import * as vscode from 'vscode';
 import * as moment from 'moment';
 import * as fs from "fs";
+import * as intersectingRanges from 'intersecting-Ranges'
 
 import { TimeInterval } from './interfaces';
-import { getStorageFilePath } from './PathUtils';
-import { hasIntersection, getTimeIntervalsCroppedToTimeRange } from './TimeIntervalUtils';
+import { pathUtils } from './PathUtils';
+import { consolidator } from './Consolidator';
+import { timeIntervalUtils } from './TimeIntervalUtils';
 
 export class YearStorage {
 
@@ -21,7 +23,7 @@ export class YearStorage {
     this.context = context;
     this.ensureStoragePath((context as any).globalStoragePath);
 
-    this._globalStoragePath = getStorageFilePath(context, new Date().getUTCFullYear());
+    this._globalStoragePath = pathUtils.getStorageFilePath(context, new Date().getUTCFullYear());
     console.log(this._globalStoragePath);
     this.consolidateAndSave();
 
@@ -33,46 +35,10 @@ export class YearStorage {
   }
 
   consolidateAndSave() {
+
     const timeIntervals = this.loadTimeIntervals();
-    const consolidated = this.consolidate(timeIntervals);
+    const consolidated = consolidator.consolidate(timeIntervals);
     this.saveTimeIntervals(consolidated);
-  }
-
-  consolidate(intervals: TimeInterval[]) {
-    let resultIntervals = intervals.slice();
-    for (let i1 = 0; i1 < intervals.length; i1++) {
-      const interval1 = intervals[i1];
-
-      const intersectedElements: TimeInterval[] = [];
-      for (let i2 = 0; i2 < resultIntervals.length; i2++) {
-        const interval2 = resultIntervals[i2];
-        if (i1 == i2) {
-          continue;
-        }
-        if (hasIntersection(interval1, interval2.start, interval2.end)) {
-          intersectedElements.push(interval2);
-        }
-      }
-
-      if (intersectedElements.length > 0) {
-        const delimiter = "; ";
-        resultIntervals = resultIntervals.filter(x => !intersectedElements.some(y => y == x));
-        const workspacesSomeWithDelimitedStrings = new Set(resultIntervals.map(x => x.workspace));
-        const arrayOfArrays = [...workspacesSomeWithDelimitedStrings].map(x => x.split(delimiter));
-        const flatArrayOFWorkspaces = [].concat.apply([], arrayOfArrays)
-
-        const newInterval: TimeInterval =
-        {
-          workspace: [... new Set(flatArrayOFWorkspaces)].join(delimiter),
-          start: Math.min(...intersectedElements.map(x => x.start)),
-          end: Math.max(...intersectedElements.map(x => x.end)),
-
-        };
-        resultIntervals.push(newInterval)
-      }
-    }
-
-    return resultIntervals;
   }
 
   ensureStoragePath(path: string) {
@@ -107,7 +73,7 @@ export class YearStorage {
     this._currentDayStart = startOfTodayMiliseconds;
 
     const timeIntervals = [...this._savedTimeIntervals, ...this._newTimeIntervals].filter(x => !(x.end < startOfTodayMiliseconds));
-    const milisecondsArray: number[] = getTimeIntervalsCroppedToTimeRange(timeIntervals, startOfTodayMiliseconds, endOfTodayMiliseconds).map(x => x.end - x.start);
+    const milisecondsArray: number[] = timeIntervalUtils.getTimeIntervalsCroppedToTimeRange(timeIntervals, startOfTodayMiliseconds, endOfTodayMiliseconds).map(x => x.end - x.start);
 
     this._todayDurationMiliseconds = milisecondsArray && milisecondsArray.length > 0 ? milisecondsArray.reduce((accumulator, currentValue) => accumulator + currentValue) : 0;
     return this._todayDurationMiliseconds;

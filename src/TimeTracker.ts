@@ -6,7 +6,8 @@ import { Reminder, TimeInterval } from './interfaces';
 import { YearStorage } from './YearStorage';
 import * as vscode from 'vscode';
 import { LogWebView } from './LogWebView';
-import { formatTimeFromMiliseconds, formatTime } from './TimeFormat';
+import { timeFormat } from './TimeFormat';
+import { consolidator } from './Consolidator';
 
 export class TimeTracker {
 
@@ -23,6 +24,18 @@ export class TimeTracker {
     _stopStartAt: number;
 
     constructor(context: vscode.ExtensionContext) {
+
+        // const result = consolidator.consolidate([
+        //     { start: 10, end: 15, workspace: '10-15' }
+        //     ,{ start: 13, end: 15, workspace: '13-15' }
+        //     ,{ start: 130, end: 150, workspace: '130-150' }
+        //     ,{ start: 15, end: 16, workspace: '15-16' }
+        //     ,{ start: 16, end: 20, workspace: '16-20' }
+        //     ,{ start: 1, end: 15, workspace: '1-15' }
+        //     ,{ start: 6, end: 200, workspace: '6-200' }
+        //      ]);
+
+
         this._context = context;
         this._storage = new YearStorage(this._context);
 
@@ -135,18 +148,18 @@ export class TimeTracker {
         const iconText = this._isStopped ? "$(primitive-square) " : "$(triangle-right) ";
 
         const totalDurationMilliseconds = this._storage.totalDurationMiliseconds + (now - this._currentTimeInterval.start);
-        const totalDurationText = formatTimeFromMiliseconds(totalDurationMilliseconds);
+        const totalDurationText = timeFormat.formatTimeFromMiliseconds(totalDurationMilliseconds);
 
         const totalWorkspaceMilliseconds = this._storage.getTotalWorkspaceMiliseconds(vscode.workspace.name) + (now - this._currentTimeInterval.start);
-        const totalWorkspaceText = formatTimeFromMiliseconds(totalWorkspaceMilliseconds);
+        const totalWorkspaceText = timeFormat.formatTimeFromMiliseconds(totalWorkspaceMilliseconds);
 
         const todayDurationMilliseconds = this._storage.todayDurationMiliseconds + (now - this._currentTimeInterval.start);
-        const todayDuration = formatTimeFromMiliseconds(todayDurationMilliseconds);
+        const todayDuration = timeFormat.formatTimeFromMiliseconds(todayDurationMilliseconds);
 
         const intervalsFromStart = this._startAppIntervals.map(x => (x.end || Date.now()) - x.start);
         intervalsFromStart.reduce((accumulator, currentValue) => accumulator + currentValue)
         const fromStartDurationMilliseconds = intervalsFromStart.reduce((accumulator, currentValue) => accumulator + currentValue);
-        const fromStartDurationText = formatTimeFromMiliseconds(fromStartDurationMilliseconds);
+        const fromStartDurationText = timeFormat.formatTimeFromMiliseconds(fromStartDurationMilliseconds);
 
         let nextReminderText = "";
 
@@ -159,7 +172,7 @@ export class TimeTracker {
             if (nextReminder) {
                 const secondsToPause = (nextReminder.lastPauseEnd + nextReminder.intervalMinutes * this.MILISECONDS_IN_MINUTE - (this._isStopped ? this._stopStartAt : now)) / 1000;
                 const format = secondsToPause <= 90 ? "y[y] M[M] w[w] d[d] h[h] m[m] s[s]" : "y[y] M[M] w[w] d[d] h[h] m[m]";
-                nextReminderText = "" + nextReminder.title + " in " + formatTime(secondsToPause < 0 ? 0 : secondsToPause, format);
+                nextReminderText = "" + nextReminder.title + " in " + timeFormat.formatTime(secondsToPause < 0 ? 0 : secondsToPause, format);
             }
         }
 
