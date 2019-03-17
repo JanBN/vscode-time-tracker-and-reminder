@@ -13,7 +13,7 @@ export class YearStorage {
   _savedTimeIntervals: TimeInterval[];
   _newTimeIntervals: TimeInterval[] = [];
   _totalDurationMiliseconds: number = null;
-  _todayDurationMiliseconds: number = null;
+  _todayDurationMilisecondsWithoutCurrentInterval: number = null;
   _totalWorkspaceMiliseconds: number = null;
   _currentDayStart: number;
 
@@ -60,9 +60,20 @@ export class YearStorage {
     return moment().startOf('day').valueOf() != this._currentDayStart;
   }
 
-  public get todayDurationMiliseconds() {
-    if (this._todayDurationMiliseconds && !this.isDayChange()) {
-      return this._todayDurationMiliseconds;
+  public getTodayDurationMiliseconds(currentTimeInterval: TimeInterval) {
+
+    let currentTimeIntervalTodayMillisecond = 0;
+    if (currentTimeInterval) {
+      const currentTimeIntervalCopy = { start: currentTimeInterval.start, end: Date.now(), workspace: currentTimeInterval.workspace };
+      const startOfTodayMiliseconds = moment().startOf('day').valueOf();
+      const endOfTodayMiliseconds = moment().startOf('day').add(1, 'days').valueOf();
+
+      const croppedInterval = timeIntervalUtils.getTimeIntervalCroppedToTimeRange(currentTimeIntervalCopy, startOfTodayMiliseconds, endOfTodayMiliseconds)
+      currentTimeIntervalTodayMillisecond = croppedInterval.end - croppedInterval.start;
+    }
+
+    if (this._todayDurationMilisecondsWithoutCurrentInterval && !this.isDayChange()) {
+      return this._todayDurationMilisecondsWithoutCurrentInterval + currentTimeIntervalTodayMillisecond;
     }
 
     const startOfTodayMiliseconds = moment().startOf('day').valueOf();
@@ -71,10 +82,11 @@ export class YearStorage {
     this._currentDayStart = startOfTodayMiliseconds;
 
     const timeIntervals = [...this._savedTimeIntervals, ...this._newTimeIntervals].filter(x => !(x.end < startOfTodayMiliseconds));
-    const milisecondsArray: number[] = timeIntervalUtils.getTimeIntervalsCroppedToTimeRange(timeIntervals, startOfTodayMiliseconds, endOfTodayMiliseconds).map(x => x.end - x.start);
 
-    this._todayDurationMiliseconds = milisecondsArray && milisecondsArray.length > 0 ? milisecondsArray.reduce((accumulator, currentValue) => accumulator + currentValue) : 0;
-    return this._todayDurationMiliseconds;
+
+    const milisecondsArray: number[] = timeIntervalUtils.getTimeIntervalsCroppedToTimeRange(timeIntervals, startOfTodayMiliseconds, endOfTodayMiliseconds).map(x => x.end - x.start);
+    this._todayDurationMilisecondsWithoutCurrentInterval = milisecondsArray && milisecondsArray.length > 0 ? milisecondsArray.reduce((accumulator, currentValue) => accumulator + currentValue) : 0;
+    return this._todayDurationMilisecondsWithoutCurrentInterval + currentTimeIntervalTodayMillisecond;
   }
 
   public getTotalWorkspaceMiliseconds(workspace: string): number {
@@ -106,7 +118,7 @@ export class YearStorage {
 
   public clearCounters() {
     this._totalDurationMiliseconds = null;
-    this._todayDurationMiliseconds = null;
+    this._todayDurationMilisecondsWithoutCurrentInterval = null;
     this._totalWorkspaceMiliseconds = null;
   }
 

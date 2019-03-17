@@ -153,7 +153,7 @@ export class TimeTracker {
         const totalWorkspaceMilliseconds = this._storage.getTotalWorkspaceMiliseconds(vscode.workspace.name) + (now - this._currentTimeInterval.start);
         const totalWorkspaceText = timeFormat.formatTimeFromMiliseconds(totalWorkspaceMilliseconds);
 
-        const todayDurationMilliseconds = this._storage.todayDurationMiliseconds + (now - this._currentTimeInterval.start);
+        const todayDurationMilliseconds = this._storage.getTodayDurationMiliseconds(this._currentTimeInterval);
         const todayDuration = timeFormat.formatTimeFromMiliseconds(todayDurationMilliseconds);
 
         const intervalsFromStart = this._startAppIntervals.map(x => (x.end || Date.now()) - x.start);
