@@ -138,6 +138,7 @@ export class LogWebView {
           
           <h4 style="" class="collapsible  content_padding_left "> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> By workspace</h4>
           <div class="content content_padding_left" >
+            <div>*Shows how long was each workspace opend. Multiple workspaces could have been opened simultaneously. Total count takes it into account.</div>
             <table class="rtable">
               <tbody>
                 ${this.getTimePeriodDateByWorkspaceData(timeIntervals, "day", "days", "YYYY-MM-DD dddd", "Day").join("")}
@@ -171,6 +172,7 @@ export class LogWebView {
 
           <h4 style="" class="collapsible content_padding_left"> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> By workspace</h4>
           <div class="content content_padding_left">
+            <div>*Shows how long was each workspace opend. Multiple workspaces could have been opened simultaneously. Total count takes it into account.</div>
             <table class="rtable">
               <tbody>
                 ${this.getTimePeriodDateByWorkspaceData(timeIntervals, "week", "weeks", "w", "Week").join("")}
@@ -205,6 +207,7 @@ export class LogWebView {
 
           <h4 style="" class="collapsible content_padding_left"> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> By workspace</h4>
           <div class="content content_padding_left">
+            <div>*Shows how long was each workspace opend. Multiple workspaces could have been opened simultaneously. Total count takes it into account.</div>
             <table class="rtable">
               <tbody>
                 ${this.getTimePeriodDateByWorkspaceData(timeIntervals, "month", "months", "MMMM", "Month").join("")}
@@ -220,7 +223,14 @@ export class LogWebView {
         `;
   }
 
-  private getTimePeriodDateData(timeIntervals: TimeInterval[], startOfResolution: moment.unitOfTime.StartOf, timerangeResolution: moment.unitOfTime.DurationConstructor, momentDateFormat: string, tableDateLabel: string, showTotalRow: boolean = true) {
+  private getTimePeriodDateData(timeIntervals: TimeInterval[]
+    , startOfResolution: moment.unitOfTime.StartOf
+    , timerangeResolution: moment.unitOfTime.DurationConstructor
+    , momentDateFormat: string
+    , tableDateLabel: string
+    , totalCountFunc: (start: number, end: number) => number = null
+    , totalLabel: string = null) {
+
     const dateTimeIntervals = {};
     timeIntervals.forEach(x => {
 
@@ -259,9 +269,18 @@ export class LogWebView {
       const keyNumber = +key;
       let dateString = moment(keyNumber).format(momentDateFormat);
       const timeIntervals: TimeInterval[] = dateTimeIntervals[key];
-      const totalDateTimeMillisecondsArray = timeIntervals.map(x => x.end - x.start);
-      const totalDateSum = totalDateTimeMillisecondsArray && totalDateTimeMillisecondsArray.length > 0 ? totalDateTimeMillisecondsArray.reduce((accumulator, currentValue) => accumulator + currentValue) : 0;
+
+      let totalDateSum = 0;
+      if (totalCountFunc) {
+        totalDateSum = totalCountFunc(keyNumber, moment(keyNumber).endOf(timerangeResolution).valueOf());
+      }
+      else {
+        const totalDateTimeMillisecondsArray = timeIntervals.map(x => x.end - x.start);
+        totalDateSum = totalDateTimeMillisecondsArray && totalDateTimeMillisecondsArray.length > 0 ? totalDateTimeMillisecondsArray.reduce((accumulator, currentValue) => accumulator + currentValue) : 0;
+      }
+
       const totalDateString = timeFormat.formatTimeFromMiliseconds(totalDateSum);
+
       const grouppedByWorkspace = timeIntervalUtils.groupBy(timeIntervals, 'workspace');
 
       const workspaceWithTimeIntervalsArray: WorkspaceTimeIntervals[] = [];
@@ -296,24 +315,22 @@ export class LogWebView {
         dateString = ""; // clear date string so it is shwon only the first time
       }
 
-      if (showTotalRow) {
-        tableRows.push(`
+      tableRows.push(`
           <tr>
             <td style="min-width: 100px;"></td>
-            <td style="min-width: 100px;"><b>Total</b></td> 
+            <td style="min-width: 100px;"><b>${totalLabel ? totalLabel : "Total"}</b></td> 
             <td style="min-width: 100px;"><b>${totalDateString}</b></td> 
           </tr>
           `);
-      }
     }
     return tableRows;
   }
 
-  private getTimePeriodDateByWorkspaceData(timeIntervals: TimeInterval[], startOfResolution: moment.unitOfTime.StartOf, timerangeResolution: moment.unitOfTime.DurationConstructor, momentDateFormat: string, tableDateLabel: string) {
+  private getTimePeriodDateByWorkspaceData(allTimeIntervals: TimeInterval[], startOfResolution: moment.unitOfTime.StartOf, timerangeResolution: moment.unitOfTime.DurationConstructor, momentDateFormat: string, tableDateLabel: string) {
 
     const timeIntervalsOneWorkspacePerEach: TimeInterval[] = [];
-    for (let i = 0; i < timeIntervals.length; i++) {
-      const element = timeIntervals[i];
+    for (let i = 0; i < allTimeIntervals.length; i++) {
+      const element = allTimeIntervals[i];
       const workspaces = element.workspace.split(WORKSPACE_NAME_DELIMITER);
       for (let j = 0; j < workspaces.length; j++) {
         const workspace = workspaces[j];
@@ -326,7 +343,8 @@ export class LogWebView {
       , timerangeResolution
       , momentDateFormat
       , tableDateLabel
-      , false
+      , (start, end) => { return this.getTimeSum(allTimeIntervals, start, end) }
+      , "Total*"
     );
 
     return result;
