@@ -112,13 +112,13 @@ export class LogWebView {
       monthMilliseconds.push(monthSum);
     }
 
-    return `<h2 style="padding-top:15px"> ${year} </h2>
+    return `<h2 style="padding-top:20px"> ${year} </h2>
     <b> Total time spent: </b> ${timeFormat.formatTimeFromMiliseconds(yearSum)}
 
         <h3 style="" class="collapsible active"> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> Days</h3>
         <div class="content" style="display:block">
           
-        <h4 style="" class="collapsible active"> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> Summary</h4>
+        <h4 style="" class="collapsible  content_padding_left "> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> Summary</h4>
         <div class="content content_padding_left" >
           <table class="rtable">
             <tbody>
@@ -127,7 +127,7 @@ export class LogWebView {
           </table>
         </div>
 
-        <h4 style="" class="collapsible active"> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> Details</h4>
+        <h4 style="" class="collapsible  content_padding_left active"> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> Details</h4>
           <div class="content content_padding_left" style="display:block;">
             <table class="rtable">
               <tbody>
@@ -136,7 +136,7 @@ export class LogWebView {
             </table>
           </div>
           
-          <h4 style="" class="collapsible active"> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> By workspace</h4>
+          <h4 style="" class="collapsible  content_padding_left "> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> By workspace</h4>
           <div class="content content_padding_left" >
             <table class="rtable">
               <tbody>
@@ -145,15 +145,13 @@ export class LogWebView {
             </table>
           </div>
 
-          
-
         </div>
 
 
         <h3 style="" class="collapsible "> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> Weeks</h3>
         <div class="content" style=""">
           
-        <h4 style="" class="collapsible active"> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> Summary</h4>
+        <h4 style="" class="collapsible content_padding_left"> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> Summary</h4>
         <div class="content content_padding_left" >
           <table class="rtable">
             <tbody>
@@ -162,7 +160,7 @@ export class LogWebView {
           </table>
         </div>
 
-        <h4 style="" class="collapsible "> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> Details</h4>
+        <h4 style="" class="collapsible content_padding_left"> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> Details</h4>
           <div class="content content_padding_left">
             <table class="rtable">
               <tbody>
@@ -171,7 +169,7 @@ export class LogWebView {
             </table>
           </div>
 
-          <h4 style="" class="collapsible "> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> By workspace</h4>
+          <h4 style="" class="collapsible content_padding_left"> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> By workspace</h4>
           <div class="content content_padding_left">
             <table class="rtable">
               <tbody>
@@ -187,7 +185,7 @@ export class LogWebView {
         <h3 style="" class="collapsible"> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> Months</h3>
         <div class="content">
 
-          <h4 style="" class="collapsible active"> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> Summary</h4>
+          <h4 style="" class="collapsible"content_padding_left> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> Summary</h4>
           <div class="content content_padding_left" >
             <table class="rtable">
               <tbody>
@@ -196,7 +194,7 @@ export class LogWebView {
             </table>
           </div>
 
-          <h4 style="" class="collapsible "> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> Months</h4>
+          <h4 style="" class="collapsible content_padding_left"> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> Months</h4>
           <div class="content content_padding_left">
             <table class="rtable">
               <tbody>
@@ -205,7 +203,7 @@ export class LogWebView {
             </table>
           </div>
 
-          <h4 style="" class="collapsible "> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> By workspace</h4>
+          <h4 style="" class="collapsible content_padding_left"> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> By workspace</h4>
           <div class="content content_padding_left">
             <table class="rtable">
               <tbody>
@@ -386,8 +384,6 @@ export class LogWebView {
     }
     return tableRows;
   }
-
-
 
   private getLastYearsHtmlData() {
     let year = new Date().getUTCFullYear() - 1;
@@ -663,7 +659,7 @@ export class LogWebView {
       }
 
       h3 {
-          font-size: 17px !important;
+          font-size: 16px !important;
           line-height: 20px;
           margin:0px;
           margin-top:10px;
