@@ -33,6 +33,10 @@
 				"title": "(Time Tracker & Reminder) Open & show data file"
 			},
 			{
+				"command": "extension.exportLog",
+				"title": "(Time Tracker & Reminder) Export log"
+			},
+			{
 				"command": "extension.showLog",
 				"title": "(Time Tracker & Reminder) Show log"
 			}

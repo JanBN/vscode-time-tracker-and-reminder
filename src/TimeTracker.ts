@@ -61,6 +61,7 @@ export class TimeTracker {
         vscode.commands.registerCommand('extension.clearAllData', () => this.clearAllData());
         vscode.commands.registerCommand('extension.toggleStop', () => this.toggleStop());
         vscode.commands.registerCommand('extension.showLog', () => this.showLogWebView());
+        vscode.commands.registerCommand('extension.exportLog', () => this.exportLog());
         vscode.commands.registerCommand('extension.showDataFile', () => {
             vscode.workspace.openTextDocument(this._storage._globalStoragePath).then(doc => vscode.window.showTextDocument(doc))
             vscode.window.showInformationMessage(this._storage._globalStoragePath);
@@ -396,8 +397,13 @@ export class TimeTracker {
         vscode.window.showInformationMessage('Data cleared');
     }
 
+    private exportLog()
+    {
+        new LogWebView(this._context, this._storage, !this._currentTimeInterval.end ? this._currentTimeInterval : null).exportLog();
+    }
+
     private showLogWebView() {
-        new LogWebView(this._context, this._storage, !this._currentTimeInterval.end ? this._currentTimeInterval : null);
+        new LogWebView(this._context, this._storage, !this._currentTimeInterval.end ? this._currentTimeInterval : null).show();
     }
 
     private saveData() {

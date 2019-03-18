@@ -22,11 +22,20 @@ export class LogWebView {
     if (!this._currentTimeInterval.end) {
       this._currentTimeInterval.end = Date.now();
     }
-
-    this.init();
   }
 
-  private init() {
+  exportLog() {
+    pathUtils.ensureStoragePath((this._context as any).globalStoragePath);
+    const path = pathUtils.getFilePathForLogExport(this._context);
+    fs.writeFileSync(path, this.getWebviewContent(), "utf8");
+    vscode.window.showInformationMessage("Log exported - " + path, 'Open').then(e => {
+      if (e) {
+        vscode.workspace.openTextDocument(path).then(doc => vscode.window.showTextDocument(doc));
+      }
+    });
+  }
+
+  show() {
     this._panel = vscode.window.createWebviewPanel(
       'time-tracker-log', // Identifies the type of the webview. Used internally
       'Time tracker log', // Title of the panel displayed to the user
@@ -35,15 +44,6 @@ export class LogWebView {
     );
 
     this._panel.webview.html = this.getWebviewContent();
-
-    pathUtils.ensureStoragePath((this._context as any).globalStoragePath);
-    const path = pathUtils.getFilePathForLogExport(this._context);
-    fs.writeFileSync(path, this._panel.webview.html, "utf8");
-    vscode.window.showInformationMessage("Log exported - " + path, 'Open').then(e => {
-      if (e) {
-        vscode.workspace.openTextDocument(path).then(doc => vscode.window.showTextDocument(doc));
-      }
-    });
   }
 
   private getThisYearAllTimeIntervals() {
@@ -189,7 +189,7 @@ export class LogWebView {
           <div class="content content_padding_left" >
             <table class="rtable">
               <tbody>
-                ${this.getPeriodSummaryData(timeIntervals,"month", "months", "MMMM", "Month").join("")}
+                ${this.getPeriodSummaryData(timeIntervals, "month", "months", "MMMM", "Month").join("")}
               </tbody>
             </table>
           </div>
