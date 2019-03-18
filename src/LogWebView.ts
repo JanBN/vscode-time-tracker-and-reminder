@@ -211,7 +211,13 @@ export class LogWebView {
 
         const workspaceMillisecondsArray = timeIntervals.map(x => x.end - x.start);
         const workspaceSum = workspaceMillisecondsArray && workspaceMillisecondsArray.length > 0 ? workspaceMillisecondsArray.reduce((accumulator, currentValue) => accumulator + currentValue) : 0;
-        const workspaceSumString = timeFormat.formatTimeFromMiliseconds(workspaceSum);
+
+        if (workspaceSum < 1000) // second
+        {
+          continue;
+        }
+
+        const workspaceSumString = timeFormat.formatTimeFromMiliseconds(workspaceSum, workspaceSum < 60 * 1000 ? "y[y] M[M] w[w] d[d] h[h] m[m] s[s]" : "y[y] M[M] w[w] d[d] h[h] m[m]");
         tableRows.push(`
           <tr>
             <td style="width: 150px;"><b>${dateString}</b></td>
