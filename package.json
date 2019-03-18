@@ -79,6 +79,18 @@
 					"type": "boolean",
 					"default": "true",
 					"description": "Show next reminder in status bar"
+				},
+				"time-tracker.saveingOption": {
+					"type": "string",
+					"enum": [
+						"on vscode exit",
+						"on vscode exit and every 5 minutes",
+						"on vscode exit and every 10 minutes",
+						"on vscode exit and every 15 minutes",
+						"on vscode exit and every 30 minutes"
+					],
+					"default": "on vscode exit and every 5 minutes",
+					"description": "Saving option ('on vscode exit' wont save in case of restart or shutdown pc)"
 				}
 			}
 		}

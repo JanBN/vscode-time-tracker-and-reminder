@@ -1,5 +1,4 @@
 'use strict';
-// import * as moment from 'moment';
 import 'moment-duration-format';
 import { StatusBarAlignment, StatusBarItem, window, workspace } from 'vscode';
 import { Reminder, TimeInterval } from './interfaces';
@@ -34,6 +33,18 @@ export class TimeTracker {
         //     ,{ start: 1, end: 15, workspace: '1-15' }
         //     ,{ start: 6, end: 200, workspace: '6-200' }
         //      ]);
+
+        // const result = consolidator.joinAdjacentIntervalsToOne([
+        // { start: 10, end: 15, workspace: "a" }
+        // ,{ start: 15, end: 20, workspace: "a" }
+        // ,{ start: 25, end: 30, workspace: "a" }
+        // ,{ start: 30, end: 40, workspace: "a" }
+        // ,{ start: 40, end: 41, workspace: "a" }
+        // ,{ start: 10, end: 15, workspace: "b" }
+        // ,{ start: 15, end: 40, workspace: 'b' }
+        // ,{ start: 45, end: 48, workspace: 'b' }
+        // ,{ start: 15, end: 180, workspace: 'c' }
+        //  ]);
 
 
         this._context = context;
@@ -103,17 +114,17 @@ export class TimeTracker {
         }
     }
 
-    private startCurrentTimenterval() {
+    private startCurrentTimenterval(date?: number) {
         this._currentTimeInterval = {
-            start: Date.now(),
+            start: date ? date : Date.now(),
             workspace: workspace && workspace.name || "--"
         };
 
         this._startAppIntervals.push(this._currentTimeInterval);
     }
 
-    private endCurrentTimeInterval() {
-        this._currentTimeInterval.end = Date.now();
+    private endCurrentTimeInterval(date?: number) {
+        this._currentTimeInterval.end = date ? date : Date.now();
         this._storage.addTimeInterval(this._currentTimeInterval);
     }
 
@@ -219,7 +230,7 @@ export class TimeTracker {
                 }
             }
 
-        }, reminder.pauseMinutes * 60 * 1000);
+        }, reminder.pauseMinutes * this.MILISECONDS_IN_MINUTE);
 
         this.timeElapsed();
     }
@@ -322,18 +333,33 @@ export class TimeTracker {
     }
 
     private timeElapsed() {
-
         if (!this._isStopped) {
             this.processReminders();
+        }
+
+        const saveInterval = this.getSaveInterval();
+
+        if (saveInterval && Date.now() - this._currentTimeInterval.start > saveInterval)
+        {
+            this.saveData();
         }
 
         this.recomputeStatusBar();
     }
 
+    private getSaveInterval() {
+        if (this._config.saveingOption == "on vscode exit and every 5 minutes") return 5 * this.MILISECONDS_IN_MINUTE;
+        if (this._config.saveingOption == "on vscode exit and every 10 minutes") return 10 * this.MILISECONDS_IN_MINUTE;
+        if (this._config.saveingOption == "on vscode exit and every 15 minutes") return 15 * this.MILISECONDS_IN_MINUTE;
+        if (this._config.saveingOption == "on vscode exit and every 30 minutes") return 30 * this.MILISECONDS_IN_MINUTE;
+
+        return null;
+    }
+
     private createInterval() {
         this._invervalId = setInterval(() => {
             this.timeElapsed();
-        }, 1000 * 60);
+        }, this.MILISECONDS_IN_MINUTE );
 
         this.timeElapsed();
     }
@@ -370,6 +396,16 @@ export class TimeTracker {
 
     private showLogWebView() {
         new LogWebView(this._context, this._storage, !this._currentTimeInterval.end ? this._currentTimeInterval : null);
+    }
+
+    private saveData() {
+        const now = Date.now();
+        this.endCurrentTimeInterval(now);
+        this._storage.saveAll();
+        this._storage.initTimeIntervals();
+        this.startCurrentTimenterval(now);
+
+        this.recomputeStatusBar();
     }
 
     dispose() {

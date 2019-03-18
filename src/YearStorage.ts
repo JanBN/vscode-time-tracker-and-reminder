@@ -22,20 +22,24 @@ export class YearStorage {
     this.ensureStoragePath((context as any).globalStoragePath);
 
     this._globalStoragePath = pathUtils.getStorageFilePath(context, new Date().getUTCFullYear());
-    console.log(this._globalStoragePath);
-    this.consolidateAndSave();
 
-    this._savedTimeIntervals = this.loadTimeIntervals();
+    this.initTimeIntervals();
   }
 
   getAllTimeIntervals() {
     return [...this._savedTimeIntervals, ...this._newTimeIntervals];
   }
 
-  consolidateAndSave() {
+  initTimeIntervals() {
+    this.consolidateAndSave();
+    this._savedTimeIntervals = this.loadTimeIntervals();
+    this._newTimeIntervals = [];
+    this.clearCounters()
+  }
 
+  consolidateAndSave() {
     const timeIntervals = this.loadTimeIntervals();
-    const consolidated = consolidator.consolidate(timeIntervals);
+    const consolidated = consolidator.consolidate([...timeIntervals, ...this._newTimeIntervals]);
     this.saveTimeIntervals(consolidated);
   }
 
@@ -133,6 +137,7 @@ export class YearStorage {
   }
 
   private saveTimeIntervals(value: TimeInterval[]) {
+    value = value.sort((a, b) => a.start - b.start);
     fs.writeFileSync(this._globalStoragePath, JSON.stringify(value), "utf8");
   }
 }

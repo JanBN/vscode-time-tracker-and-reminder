@@ -1,11 +1,16 @@
 'use strict';
 import { TimeInterval } from "./interfaces";
+
+export interface WorkspaceTimeIntervals {
+  workspaceName: string;
+  timeIntervals: TimeInterval[]
+}
+
 class TimeIntervalUtils {
   hasIntersection(interval: TimeInterval, rangeStart: number, rangeEnd: number): Boolean {
     const result = (interval.start == rangeStart) || (interval.start > rangeStart ? interval.start < rangeEnd : rangeStart < interval.end);
     return result;
   }
-
 
   getIntersectedPoints(interval1: TimeInterval, interval2: TimeInterval, ): [number, number] {
     const as = interval1.start;
@@ -43,6 +48,17 @@ class TimeIntervalUtils {
     });
 
     return result;
+  }
+
+  groupBy(objectArray, property) {
+    return objectArray.reduce(function (acc, obj) {
+      var key = obj[property];
+      if (!acc[key]) {
+        acc[key] = [];
+      }
+      acc[key].push(obj);
+      return acc;
+    }, {});
   }
 }
 

@@ -5,12 +5,7 @@ import { TimeInterval } from './interfaces';
 import * as fs from "fs";
 import { timeFormat } from './TimeFormat';
 import { pathUtils } from './PathUtils';
-import { timeIntervalUtils } from './TimeIntervalUtils';
-
-interface WorkspaceTimeIntervals {
-  workspaceName: string;
-  timeIntervals: TimeInterval[]
-}
+import { timeIntervalUtils, WorkspaceTimeIntervals } from './TimeIntervalUtils';
 
 export class LogWebView {
   _context: vscode.ExtensionContext;
@@ -87,17 +82,6 @@ export class LogWebView {
     const sum = timeIntervalsDuration && timeIntervalsDuration.length > 0 ? timeIntervalsDuration.reduce((accumulator, currentValue) => accumulator + currentValue) : 0;
 
     return sum;
-  }
-
-  private groupBy(objectArray, property) {
-    return objectArray.reduce(function (acc, obj) {
-      var key = obj[property];
-      if (!acc[key]) {
-        acc[key] = [];
-      }
-      acc[key].push(obj);
-      return acc;
-    }, {});
   }
 
   private getYearHtmlData(year: number, timeIntervals: TimeInterval[]): string {
@@ -210,7 +194,7 @@ export class LogWebView {
       const totalDateTimeMillisecondsArray = timeIntervals.map(x => x.end - x.start);
       const totalDateSum = totalDateTimeMillisecondsArray && totalDateTimeMillisecondsArray.length > 0 ? totalDateTimeMillisecondsArray.reduce((accumulator, currentValue) => accumulator + currentValue) : 0;
       const totalDateString = timeFormat.formatTimeFromMiliseconds(totalDateSum);
-      const grouppedByWorkspace = this.groupBy(timeIntervals, 'workspace');
+      const grouppedByWorkspace = timeIntervalUtils.groupBy(timeIntervals, 'workspace');
 
       const workspaceWithTimeIntervalsArray: WorkspaceTimeIntervals[] = [];
       for (var key in grouppedByWorkspace) {
