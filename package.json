@@ -118,7 +118,6 @@
 		"webpack-cli": "^3.1.0"
 	},
 	"dependencies": {
-		"intersecting-ranges": "^1.2.0",
 		"moment": "^2.22.2",
 		"moment-duration-format": "^2.2.2"
 	}
