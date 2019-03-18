@@ -5,6 +5,7 @@ import { TimeInterval } from './interfaces';
 import { pathUtils } from './PathUtils';
 import { consolidator } from './Consolidator';
 import { timeIntervalUtils } from './TimeIntervalUtils';
+import { WORKSPACE_NAME_DELIMITER } from './TimeTracker';
 
 export class YearStorage {
 
@@ -19,7 +20,7 @@ export class YearStorage {
 
   constructor(context: vscode.ExtensionContext) {
     this.context = context;
-    this.ensureStoragePath((context as any).globalStoragePath);
+    pathUtils.ensureStoragePath((context as any).globalStoragePath);
 
     this._globalStoragePath = pathUtils.getStorageFilePath(context, new Date().getUTCFullYear());
 
@@ -43,11 +44,6 @@ export class YearStorage {
     this.saveTimeIntervals(consolidated);
   }
 
-  ensureStoragePath(path: string) {
-    if (!fs.existsSync(path)) {
-      fs.mkdirSync(path)
-    }
-  }
 
   public get totalDurationMiliseconds(): number {
     if (this._totalDurationMiliseconds) {
@@ -98,7 +94,7 @@ export class YearStorage {
       return this._totalWorkspaceMiliseconds;
     }
 
-    const timeIntervals = [...this._savedTimeIntervals.filter(x => x.workspace && x.workspace.split(";").some(y => y.trim() == workspace)), ...this._newTimeIntervals.filter(x => x.workspace.split(";").some(y => y.trim() == workspace))];
+    const timeIntervals = [...this._savedTimeIntervals.filter(x => x.workspace && x.workspace.split(WORKSPACE_NAME_DELIMITER).some(y => y.trim() == workspace)), ...this._newTimeIntervals.filter(x => x.workspace.split(WORKSPACE_NAME_DELIMITER).some(y => y.trim() == workspace))];
     const milisecondsArray: number[] = timeIntervals.map(x => x.end - x.start);
     this._totalWorkspaceMiliseconds = milisecondsArray && milisecondsArray.length > 0 ? milisecondsArray.reduce((accumulator, currentValue) => accumulator + currentValue) : 0;
     return this._totalWorkspaceMiliseconds;

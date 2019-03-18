@@ -6,6 +6,8 @@ import * as fs from "fs";
 import { timeFormat } from './TimeFormat';
 import { pathUtils } from './PathUtils';
 import { timeIntervalUtils, WorkspaceTimeIntervals } from './TimeIntervalUtils';
+import { WORKSPACE_NAME_DELIMITER } from './TimeTracker';
+import { start } from 'repl';
 
 export class LogWebView {
   _context: vscode.ExtensionContext;
@@ -33,6 +35,15 @@ export class LogWebView {
     );
 
     this._panel.webview.html = this.getWebviewContent();
+
+    pathUtils.ensureStoragePath((this._context as any).globalStoragePath);
+    const path = pathUtils.getFilePathForLogExport(this._context);
+    fs.writeFileSync(path, this._panel.webview.html, "utf8");
+    vscode.window.showInformationMessage("Log exported - " + path, 'Open').then(e => {
+      if (e) {
+        vscode.workspace.openTextDocument(path).then(doc => vscode.window.showTextDocument(doc));
+      }
+    });
   }
 
   private getThisYearAllTimeIntervals() {
@@ -85,12 +96,8 @@ export class LogWebView {
   }
 
   private getYearHtmlData(year: number, timeIntervals: TimeInterval[]): string {
-    const dayTableRows = this.getTimePeriodDateData(timeIntervals, "day", "days", "YYYY-MM-DD dddd", "Day");
-    const monthTableRows = this.getTimePeriodDateData(timeIntervals, "month", "months", "MMMM", "Month");
-    const weekTableRows = this.getTimePeriodDateData(timeIntervals, "week", "weeks", "w", "Week");
 
     const yearSum = this.getIntervalsSum(timeIntervalUtils.getTimeIntervalsCroppedToTimeRange(timeIntervals, moment(new Date(year, 1, 1)).startOf('year').valueOf(), moment(new Date(year, 1, 1)).endOf('year').valueOf()));
-
 
     const monthNames = [];
     const monthMilliseconds = [];
@@ -105,54 +112,117 @@ export class LogWebView {
       monthMilliseconds.push(monthSum);
     }
 
-    return `<h2> ${year} </h2>
+    return `<h2 style="padding-top:15px"> ${year} </h2>
     <b> Total time spent: </b> ${timeFormat.formatTimeFromMiliseconds(yearSum)}
 
-    <h3 class="collapsible active"> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> Days</h3>
+        <h3 style="" class="collapsible active"> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> Days</h3>
         <div class="content" style="display:block">
+          
+        <h4 style="" class="collapsible active"> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> Summary</h4>
+        <div class="content content_padding_left" >
           <table class="rtable">
             <tbody>
-              ${dayTableRows.join("")}
+              ${this.getPeriodSummaryData(timeIntervals, "day", "days", "YYYY-MM-DD dddd", "Day").join("")}
             </tbody>
           </table>
         </div>
 
-        <h3 class="collapsible"> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> Weeks</h3>
-        <div class="content">
+        <h4 style="" class="collapsible active"> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> Details</h4>
+          <div class="content content_padding_left" style="display:block;">
+            <table class="rtable">
+              <tbody>
+                ${this.getTimePeriodDateData(timeIntervals, "day", "days", "YYYY-MM-DD dddd", "Day").join("")}
+              </tbody>
+            </table>
+          </div>
+          
+          <h4 style="" class="collapsible active"> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> By workspace</h4>
+          <div class="content content_padding_left" >
+            <table class="rtable">
+              <tbody>
+                ${this.getTimePeriodDateByWorkspaceData(timeIntervals, "day", "days", "YYYY-MM-DD dddd", "Day").join("")}
+              </tbody>
+            </table>
+          </div>
+
+          
+
+        </div>
+
+
+        <h3 style="" class="collapsible "> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> Weeks</h3>
+        <div class="content" style=""">
+          
+        <h4 style="" class="collapsible active"> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> Summary</h4>
+        <div class="content content_padding_left" >
           <table class="rtable">
             <tbody>
-              ${weekTableRows.join("")}
+              ${this.getPeriodSummaryData(timeIntervals, "week", "weeks", "w", "Week").join("")}
             </tbody>
           </table>
         </div>
 
-        <h3 class="collapsible"> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> Months</h3>
+        <h4 style="" class="collapsible "> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> Details</h4>
+          <div class="content content_padding_left">
+            <table class="rtable">
+              <tbody>
+                ${this.getTimePeriodDateData(timeIntervals, "week", "weeks", "w", "Week").join("")}
+              </tbody>
+            </table>
+          </div>
+
+          <h4 style="" class="collapsible "> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> By workspace</h4>
+          <div class="content content_padding_left">
+            <table class="rtable">
+              <tbody>
+                ${this.getTimePeriodDateByWorkspaceData(timeIntervals, "week", "weeks", "w", "Week").join("")}
+              </tbody>
+            </table>
+          </div>
+
+
+          
+        </div>
+
+        <h3 style="" class="collapsible"> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> Months</h3>
         <div class="content">
-          <table class="rtable">
-            <thead>
-              <tr>
-                ${monthNames.map(x => "<th><b>" + x + "</b> </th>").join("")}          
-              </tr>
-            </thead>
 
-            <tbody>
-              <tr>
-                ${monthMilliseconds.map(x => "<td>" + timeFormat.formatTimeFromMiliseconds(x) + " </td>").join("")}
-              </tr>
-            </tbody>
-          </table>
+          <h4 style="" class="collapsible active"> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> Summary</h4>
+          <div class="content content_padding_left" >
+            <table class="rtable">
+              <tbody>
+                ${this.getPeriodSummaryData(timeIntervals,"month", "months", "MMMM", "Month").join("")}
+              </tbody>
+            </table>
+          </div>
 
-          <table class="rtable">
-            <tbody>
-              ${monthTableRows.join("")}
-            </tbody>
-          </table>
+          <h4 style="" class="collapsible "> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> Months</h4>
+          <div class="content content_padding_left">
+            <table class="rtable">
+              <tbody>
+                ${this.getTimePeriodDateData(timeIntervals, "month", "months", "MMMM", "Month").join("")}
+              </tbody>
+            </table>
+          </div>
+
+          <h4 style="" class="collapsible "> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> By workspace</h4>
+          <div class="content content_padding_left">
+            <table class="rtable">
+              <tbody>
+                ${this.getTimePeriodDateByWorkspaceData(timeIntervals, "month", "months", "MMMM", "Month").join("")}
+              </tbody>
+            </table>
+          </div>
+          
+        </div>
+
+
         </div>
     
         `;
   }
 
-  private getTimePeriodDateData(timeIntervals: TimeInterval[], startOfResolution: moment.unitOfTime.StartOf, timerangeResolution: moment.unitOfTime.DurationConstructor, momentDateFormat: string, tableDateLabel: string) {
+  private getTimePeriodDateData(timeIntervals: TimeInterval[], startOfResolution: moment.unitOfTime.StartOf, timerangeResolution: moment.unitOfTime.DurationConstructor, momentDateFormat: string, tableDateLabel: string, showTotalRow: boolean = true) {
     const dateTimeIntervals = {};
     timeIntervals.forEach(x => {
 
@@ -228,11 +298,89 @@ export class LogWebView {
         dateString = ""; // clear date string so it is shwon only the first time
       }
 
-      tableRows.push(`
+      if (showTotalRow) {
+        tableRows.push(`
           <tr>
             <td style="min-width: 100px;"></td>
             <td style="min-width: 100px;"><b>Total</b></td> 
             <td style="min-width: 100px;"><b>${totalDateString}</b></td> 
+          </tr>
+          `);
+      }
+    }
+    return tableRows;
+  }
+
+  private getTimePeriodDateByWorkspaceData(timeIntervals: TimeInterval[], startOfResolution: moment.unitOfTime.StartOf, timerangeResolution: moment.unitOfTime.DurationConstructor, momentDateFormat: string, tableDateLabel: string) {
+
+    const timeIntervalsOneWorkspacePerEach: TimeInterval[] = [];
+    for (let i = 0; i < timeIntervals.length; i++) {
+      const element = timeIntervals[i];
+      const workspaces = element.workspace.split(WORKSPACE_NAME_DELIMITER);
+      for (let j = 0; j < workspaces.length; j++) {
+        const workspace = workspaces[j];
+        timeIntervalsOneWorkspacePerEach.push({ start: element.start, end: element.end, workspace: workspace });
+      }
+    }
+
+    const result = this.getTimePeriodDateData(timeIntervalsOneWorkspacePerEach
+      , startOfResolution
+      , timerangeResolution
+      , momentDateFormat
+      , tableDateLabel
+      , false
+    );
+
+    return result;
+  }
+
+  private getPeriodSummaryData(timeIntervals: TimeInterval[], startOfResolution: moment.unitOfTime.StartOf, timerangeResolution: moment.unitOfTime.DurationConstructor, momentDateFormat: string, tableDateLabel: string) {
+
+    const dateTimeIntervals = {};
+    timeIntervals.sort((a, b) => b.start - a.start).forEach(x => {
+
+      // because of intersected intervals, need to check in which others it belongs to
+      let croppedDateInterval: TimeInterval = null;
+      let iteration = 0;
+      while (true) {
+        const dateStart = moment(x.start).startOf(startOfResolution).add(iteration, timerangeResolution).valueOf();
+        const dateEnd = moment(x.end).startOf(startOfResolution).add(iteration + 1, timerangeResolution).valueOf();
+
+        croppedDateInterval = timeIntervalUtils.getTimeIntervalCroppedToTimeRange(x, dateStart, dateEnd);
+        if (!croppedDateInterval) {
+          break;
+        }
+
+        const key = moment(croppedDateInterval.start).startOf(startOfResolution).valueOf();
+
+        if (!dateTimeIntervals[key]) {
+          dateTimeIntervals[key] = [];
+        }
+        dateTimeIntervals[key].push(croppedDateInterval);
+
+        iteration++;
+      }
+    });
+
+    const tableRows = [];
+    tableRows.push(`
+    <tr>
+      <td style="min-width: 100px;"><b>${tableDateLabel}  </b></td>
+      <td style="min-width: 100px;"><b>Time</b></td> 
+    </tr>
+    `);
+    for (var key in dateTimeIntervals) {
+      const keyNumber = +key;
+      let dateString = moment(keyNumber).format(momentDateFormat);
+      const timeIntervals: TimeInterval[] = dateTimeIntervals[key];
+      const totalDateTimeMillisecondsArray = timeIntervals.map(x => x.end - x.start);
+      const totalDateSum = totalDateTimeMillisecondsArray && totalDateTimeMillisecondsArray.length > 0 ? totalDateTimeMillisecondsArray.reduce((accumulator, currentValue) => accumulator + currentValue) : 0;
+      const totalDateString = timeFormat.formatTimeFromMiliseconds(totalDateSum);
+
+      tableRows.push(`
+          <tr>
+            <td style="min-width: 100px;"><b>${dateString}</b></td> 
+            <td style="min-width: 100px;">${totalDateString}</td> 
           </tr>
           `);
     }
@@ -515,20 +663,32 @@ export class LogWebView {
       }
 
       h3 {
-          font-size: 16px;
+          font-size: 17px !important;
           line-height: 20px;
+          margin:0px;
+          margin-top:10px;
+      }
+
+      h4 {
+        margin:5px !important;
+        font-size: 14px !important;
+        /* font-weight:normal !important; */
       }
 
       table {
-          margin-bottom: 30px;
+        /* margin-bottom: 30px;*/
       }
 
       a {
-          //color: #ff6680;
+        /*color: #ff6680;*/
       }
 
+      .content_padding_left
+      {
+        padding-left:20px;
+      }
       code {
-          //background: #fffbcc;
+        /*background: #fffbcc;*/
           font-size: 12px;
       }
     </style>`;

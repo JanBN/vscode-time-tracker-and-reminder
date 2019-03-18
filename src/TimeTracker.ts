@@ -8,6 +8,8 @@ import { LogWebView } from './LogWebView';
 import { timeFormat } from './TimeFormat';
 import { consolidator } from './Consolidator';
 
+export const WORKSPACE_NAME_DELIMITER = "; ";
+
 export class TimeTracker {
 
     private readonly MILISECONDS_IN_MINUTE = 60000;

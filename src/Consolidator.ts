@@ -1,5 +1,6 @@
 import { TimeInterval } from "./interfaces";
 import { timeIntervalUtils, WorkspaceTimeIntervals } from "./TimeIntervalUtils";
+import { WORKSPACE_NAME_DELIMITER } from "./TimeTracker";
 
 class Consolidator {
   splitIntervalsByPoints(intervals: TimeInterval[], points: number[]): TimeInterval[] {
@@ -99,8 +100,7 @@ class Consolidator {
     }
 
     intersectedPoints = [...new Set(intersectedPoints)];
-    const splittedIntervals = this.splitIntervalsByPoints(mergedIntervals, intersectedPoints);
-    const delimiter = "; ";
+    const splittedIntervals = this.splitIntervalsByPoints(mergedIntervals, intersectedPoints);     
 
     const result: TimeInterval[] = [];
     for (let i1 = 0; i1 < splittedIntervals.length; i1++) {
@@ -125,10 +125,10 @@ class Consolidator {
       }
 
       const workspacesSomeWithDelimitedStrings = new Set(workspaceNames);
-      const arrayOfArrays = [...workspacesSomeWithDelimitedStrings].filter(x => x).map(x => x.split(delimiter));
+      const arrayOfArrays = [...workspacesSomeWithDelimitedStrings].filter(x => x).map(x => x.split(WORKSPACE_NAME_DELIMITER));
       const flatArrayOFWorkspaces = [].concat.apply([], arrayOfArrays)
 
-      interval1.workspace = [... new Set(flatArrayOFWorkspaces)].sort().join(delimiter);
+      interval1.workspace = [... new Set(flatArrayOFWorkspaces)].sort().join(WORKSPACE_NAME_DELIMITER);
     }
 
     return result;
