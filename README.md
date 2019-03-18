@@ -43,8 +43,21 @@ Track your time using vscode editor, see log, and remind you pauses for blinking
 "time-tracker.showTodayTime": true,
 "time-tracker.showFromStartTime": false,
 "time-tracker.showNextReminder": true,
-"time-tracker.onStatusbarBarClick": "show log" // possible values: "show log", "stop time tracking"
+
+"time-tracker.onStatusbarBarClick": "show log" 
+// possible values: "show log", "stop time tracking"
+
+"time-tracker.saveingOption": "on vscode exit and every 5 minutes" 
+// possible values:
+// "on vscode exit",
+// "on vscode exit and every 5 minutes",
+// "on vscode exit and every 10 minutes",
+// "on vscode exit and every 15 minutes",
+// "on vscode exit and every 30 minutes"
 ```
+
+The value **on vscode exit**-of **time-tracker.saveingOption** won't save correctly in case of restart pc or shutdow pc. In vscode there is a bug that it doesn't call extension deactivate in case of restart or shutdown. Therefore there are other options to save also on periodic intervals.
+
 
 ### Reminders
 ```
@@ -86,11 +99,11 @@ JSON string of reminders array. Prettified default value:
         "end": 1552676579707
     }
 ````
-Then it can calculate how much time you have spent running vscode. It saves into file only on vscode exit, until then it keeps intervals into variables so it access hdd only when really needed.
+Then it can calculate how much time you have spent running vscode. It saves into file on specified setting **time-tracker.saveingOption** , until then it keeps intervals in variables so it access hdd only when really needed.
 
 There is a timer running every minute to update status bar. When the time until next reminder is less then 1.5 minutes it starts timer every seconds so you can see how many seconds until reminder in status bar. When the time is up it runs timer every minute again.
 
-When running multiple instances of vscode it finds intersected time intervals and consolidates them (joins them to one, with min start and max end). It means it counts should be counting spent time correctly even when running multiple instances of vscode.
+When running multiple instances of vscode it finds intersected time intervals and consolidates them (split by intervals, joins them, merge etc). It means it counts should be counting spent time correctly even when running multiple instances of vscode.
 
 
 <div>Icons made by <a href="https://www.freepik.com/" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" 			    title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" 			    title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>
