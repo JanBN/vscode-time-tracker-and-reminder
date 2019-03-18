@@ -228,8 +228,8 @@ export class LogWebView {
       let croppedDateInterval: TimeInterval = null;
       let iteration = 0;
       while (true) {
-        const dateStart = moment(x.start).startOf(startOfResolution).add(iteration, timerangeResolution).valueOf();
-        const dateEnd = moment(x.end).startOf(startOfResolution).add(iteration + 1, timerangeResolution).valueOf();
+        const dateStart = moment(x.start).add(iteration, timerangeResolution).startOf(startOfResolution).valueOf();
+        const dateEnd = moment(x.start).add(iteration, timerangeResolution).endOf(startOfResolution).valueOf();
 
         croppedDateInterval = timeIntervalUtils.getTimeIntervalCroppedToTimeRange(x, dateStart, dateEnd);
         if (!croppedDateInterval) {
@@ -341,8 +341,8 @@ export class LogWebView {
       let croppedDateInterval: TimeInterval = null;
       let iteration = 0;
       while (true) {
-        const dateStart = moment(x.start).startOf(startOfResolution).add(iteration, timerangeResolution).valueOf();
-        const dateEnd = moment(x.end).startOf(startOfResolution).add(iteration + 1, timerangeResolution).valueOf();
+        const dateStart = moment(x.start).add(iteration, timerangeResolution).startOf(startOfResolution).valueOf();
+        const dateEnd = moment(x.start).add(iteration, timerangeResolution).endOf(startOfResolution).valueOf();
 
         croppedDateInterval = timeIntervalUtils.getTimeIntervalCroppedToTimeRange(x, dateStart, dateEnd);
         if (!croppedDateInterval) {
@@ -410,12 +410,12 @@ export class LogWebView {
     const timeIntervals = this.getThisYearAllTimeIntervals();
 
     const today = moment().startOf('day');
-    const yesterday = today.clone().subtract(1, 'days');
+    const yesterday = today.clone().subtract(1, 'days').startOf("day");
 
-    const todayMilliseconds = this.getTimeSum(timeIntervals, today.valueOf(), today.clone().add(1, 'days').valueOf());
-    const yesterdayMilliseconds = this.getTimeSum(timeIntervals, yesterday.valueOf(), today.valueOf());
-    const last7DaysMilliseconds = this.getTimeSum(timeIntervals, today.clone().subtract(7, 'days').valueOf(), today.valueOf());
-    const thisWeekMilliseconds = this.getTimeSum(timeIntervals, today.clone().subtract(7, 'days').valueOf(), today.valueOf());
+    const todayMilliseconds = this.getTimeSum(timeIntervals, today.valueOf(), today.clone().endOf("day").valueOf());
+    const yesterdayMilliseconds = this.getTimeSum(timeIntervals, yesterday.clone().startOf("day").valueOf(), yesterday.clone().endOf("day").valueOf());
+    const last7DaysMilliseconds = this.getTimeSum(timeIntervals, today.clone().subtract(7, 'days').valueOf(), today.clone().endOf("day").valueOf());
+    const thisWeekMilliseconds = this.getTimeSum(timeIntervals, today.clone().subtract(7, 'days').valueOf(), today.clone().endOf("day").valueOf());
     const lastWeekMilliseconds = this.getTimeSum(timeIntervals, today.clone().subtract(7, 'days').startOf('week').valueOf(), today.clone().subtract(7, 'days').endOf('week').valueOf());
     const thisMonthMilliseconds = this.getTimeSum(timeIntervals, today.clone().startOf('month').valueOf(), today.clone().endOf('month').valueOf());
     const lastMonthMilliseconds = this.getTimeSum(timeIntervals, today.clone().subtract(1, 'months').startOf('month').valueOf(), today.clone().subtract(1, 'months').endOf('month').valueOf());
