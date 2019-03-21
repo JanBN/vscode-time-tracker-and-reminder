@@ -161,7 +161,7 @@ export class LogWebView {
           </table>
         </div>
 
-        <h4 style="" class="collapsible content_padding_left"> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> Details</h4>
+          <h4 style="" class="collapsible content_padding_left"> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> Details</h4>
           <div class="content content_padding_left">
             <table class="rtable">
               <tbody>
@@ -180,14 +180,12 @@ export class LogWebView {
             </table>
           </div>
 
-
-          
         </div>
 
         <h3 style="" class="collapsible"> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> Months</h3>
         <div class="content">
 
-          <h4 style="" class="collapsible"content_padding_left> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> Summary</h4>
+          <h4 style="" class="collapsible content_padding_left"> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> Summary</h4>
           <div class="content content_padding_left" >
             <table class="rtable">
               <tbody>
