@@ -1,6 +1,6 @@
 # Time Tracker & Reminder
 
-Track your time using vscode editor, see log, and remind you pauses for blinking, standing up, or whatever
+Track your time using vscode editor, see log, and remind you pauses for blinking, standing up, or whatever.
 
 ![](https://github.com/JanBN/vscode-time-tracker-and-reminder/blob/master/assets/demo.gif)
 
@@ -10,14 +10,13 @@ Track your time using vscode editor, see log, and remind you pauses for blinking
 #### Time count
   - Counts total time spent
   - Counts total time spent in the workspace
-  - Counts today time spent
-  - Counts time spent from vscode start
-  - Counts time spent from vscode start
+  - Counts total time spent from vscode start
+  - Detailed log (by days, weeks, months, years)
 
   #### Reminders
-  - periodic custom reminder 
-  - countdown for next reminder
-  - manually/auto start/end reminder
+  - Periodic custom reminder 
+  - Countdown for next reminder
+  - Manually/auto start/end reminder
 
 
 ## Commands
@@ -56,7 +55,7 @@ Track your time using vscode editor, see log, and remind you pauses for blinking
 // "on vscode exit and every 30 minutes"
 ```
 
-The value **on vscode exit**-of **time-tracker.saveingOption** won't save correctly in case of restart pc or shutdow pc. In vscode there is a bug that it doesn't call extension deactivate in case of restart or shutdown. Therefore there are other options to save also on periodic intervals.
+The value **on vscode exit** of **time-tracker.saveingOption** won't save correctly in case of pc restart or shutdow. In vscode there is a bug that it doesn't call extension deactivate in these cases. Therefore there are other options to save data also on period intervals.
 
 
 ### Reminders
@@ -99,11 +98,11 @@ JSON string of reminders array. Prettified default value:
         "end": 1552676579707
     }
 ````
-Then it can calculate how much time you have spent running vscode. It saves into file on specified setting **time-tracker.saveingOption** , until then it keeps intervals in variables so it access hdd only when really needed.
+Then it can calculate how much time you have spent running vscode. It saves data into file on specified intervals in **time-tracker.saveingOption**. Until then it keeps intervals in variables so it access hdd only when really needed.
 
 There is a timer running every minute to update status bar. When the time until next reminder is less then 1.5 minutes it starts timer every seconds so you can see how many seconds until reminder in status bar. When the time is up it runs timer every minute again.
 
-When running multiple instances of vscode it finds intersected time intervals and consolidates them (split by intervals, joins them, merge etc). It means it counts should be counting spent time correctly even when running multiple instances of vscode.
+When running multiple instances of vscode it finds intersected time intervals and consolidates them (split by intervals, joins them, merge etc). This means that counts are correct even when running multiple instances of vscode.
 
 
 <div>Icons made by <a href="https://www.freepik.com/" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" 			    title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" 			    title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>
