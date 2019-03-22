@@ -127,8 +127,8 @@ export class LogWebView {
           </table>
         </div>
 
-        <h4 style="" class="collapsible  content_padding_left active"> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> Details</h4>
-          <div class="content content_padding_left" style="display:block;">
+        <h4 style="" class="collapsible  content_padding_left "> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> Details</h4>
+          <div class="content content_padding_left">
             <table class="rtable">
               <tbody>
                 ${this.getTimePeriodDateData(timeIntervals, "day", "days", "YYYY-MM-DD dddd", "Day").join("")}
@@ -136,8 +136,8 @@ export class LogWebView {
             </table>
           </div>
           
-          <h4 style="" class="collapsible  content_padding_left "> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> By workspace</h4>
-          <div class="content content_padding_left" >
+          <h4 style="" class="collapsible  content_padding_left active"> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> By workspace</h4>
+          <div class="content content_padding_left"  style="display:block;">
             <div>*Shows how long was each workspace opend. Multiple workspaces could have been opened simultaneously. Total count takes it into account.</div>
             <table class="rtable">
               <tbody>
