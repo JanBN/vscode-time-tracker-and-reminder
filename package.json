@@ -119,6 +119,7 @@
 	},
 	"dependencies": {
 		"moment": "^2.22.2",
-		"moment-duration-format": "^2.2.2"
+		"moment-duration-format": "^2.2.2",
+		"vsce": "^1.58.0"
 	}
 }
