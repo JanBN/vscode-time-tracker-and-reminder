@@ -2,7 +2,7 @@
 
 Track your time using vscode editor, see log, and remind you pauses for blinking, standing up, or whatever.
 
-![](https://github.com/JanBN/vscode-time-tracker-and-reminder/blob/master/assets/demo.gif)
+![](https://raw.githubusercontent.com/JanBN/vscode-time-tracker-and-reminder/master/assets/demo.gif)
 
 
 ## Features
