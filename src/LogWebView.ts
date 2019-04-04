@@ -15,6 +15,8 @@ export class LogWebView {
   _panel: vscode.WebviewPanel;
   _currentTimeInterval: TimeInterval;
 
+  ONE_DAY_MILLISECONDS: number = 86400000;
+
   constructor(context: vscode.ExtensionContext, storage: YearStorage, currentTimeInterval: TimeInterval) {
     this._context = context;
     this._storage = storage;
@@ -113,7 +115,7 @@ export class LogWebView {
     }
 
     return `<h2 style="padding-top:20px"> ${year} </h2>
-    <b> Total time spent: </b> ${timeFormat.formatTimeFromMiliseconds(yearSum)}
+    <b> Total time spent: </b> ${timeFormat.formatTimeFromMiliseconds(yearSum)} ${this.getDurationInHoursOnly(yearSum)}
 
         <h3 style="" class="collapsible active"> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> Days</h3>
         <div class="content" style="display:block">
@@ -307,7 +309,7 @@ export class LogWebView {
           <tr>
             <td style="width: 150px;"><b>${dateString}</b></td>
             <td style="width: 500px;">${workspaceName}</td> 
-            <td style="min-width: 100px;">${workspaceSumString}</td> 
+            <td style="min-width: 100px;">${workspaceSumString} ${this.getDurationInHoursOnly(workspaceSum)}</td> 
           </tr>
           `);
         dateString = ""; // clear date string so it is shwon only the first time
@@ -317,7 +319,7 @@ export class LogWebView {
           <tr>
             <td style="min-width: 100px;"></td>
             <td style="min-width: 100px;"><b>${totalLabel ? totalLabel : "Total"}</b></td> 
-            <td style="min-width: 100px;"><b>${totalDateString}</b></td> 
+            <td style="min-width: 100px;"><b>${totalDateString} ${this.getDurationInHoursOnly(totalDateSum)}</b></td> 
           </tr>
           `);
     }
@@ -394,7 +396,7 @@ export class LogWebView {
       tableRows.push(`
           <tr>
             <td style="min-width: 100px;"><b>${dateString}</b></td> 
-            <td style="min-width: 100px;">${totalDateString}</td> 
+            <td style="min-width: 100px;">${totalDateString} ${this.getDurationInHoursOnly(totalDateSum)}</td> 
           </tr>
           `);
     }
@@ -464,39 +466,47 @@ export class LogWebView {
                     <tr>
                         <td style="min-width: 100px;">${timeFormat.formatTimeFromMiliseconds(todayMilliseconds)}</td>
                         <td style="min-width: 100px;">${timeFormat.formatTimeFromMiliseconds(yesterdayMilliseconds)}</td>
-                        <td style="min-width: 100px;">${timeFormat.formatTimeFromMiliseconds(thisWeekMilliseconds)}</td>
-                        <td style="min-width: 100px;">${timeFormat.formatTimeFromMiliseconds(last7DaysMilliseconds)}</td>
-                        <td style="min-width: 100px;">${timeFormat.formatTimeFromMiliseconds(lastWeekMilliseconds)}</td>
-                        <td style="min-width: 100px;">${timeFormat.formatTimeFromMiliseconds(thisMonthMilliseconds)}</td>
-                        <td style="min-width: 100px;">${timeFormat.formatTimeFromMiliseconds(lastMonthMilliseconds)}</td>
-                        <td style="min-width: 100px;">${this.getAverageDayTimeString()}</td>
-                    </tr>
-                </tbody>
-            </table>
-            
-            ${this.getYearHtmlData(new Date().getFullYear(), this.getThisYearAllTimeIntervals())}
-            ${this.getLastYearsHtmlData()}
-           
+                        <td style="min-width: 100px;">${timeFormat.formatTimeFromMiliseconds(thisWeekMilliseconds)} ${this.getDurationInHoursOnly(thisWeekMilliseconds)}</td>
+                        <td style="min-width: 100px;">${timeFormat.formatTimeFromMiliseconds(last7DaysMilliseconds)} ${this.getDurationInHoursOnly(last7DaysMilliseconds)}</td>
+                        <td style="min-width: 100px;">${timeFormat.formatTimeFromMiliseconds(lastWeekMilliseconds)} ${this.getDurationInHoursOnly(lastWeekMilliseconds)}</td>
+                        <td style="min-width: 100px;">${timeFormat.formatTimeFromMiliseconds(thisMonthMilliseconds)} ${this.getDurationInHoursOnly(thisMonthMilliseconds)}</td>
+                        <td style="min-width: 100px;">${timeFormat.formatTimeFromMiliseconds(lastMonthMilliseconds)} ${this.getDurationInHoursOnly(lastMonthMilliseconds)}</td>
+                        <td style="min-width: 100px;">${this.getAverageDayTimeString()} </td>
+                      </tr>
+              </tbody>
+              </table>
 
-            <script>
+              ${this.getYearHtmlData(new Date().getFullYear(), this.getThisYearAllTimeIntervals())}
+              ${this.getLastYearsHtmlData()}
+
+
+<script>
             var coll = document.getElementsByClassName("collapsible");
-            var i;
-            
-            for (i = 0; i < coll.length; i++) {
-              coll[i].addEventListener("click", function() {
-                this.classList.toggle("active");
-                var content = this.nextElementSibling;
-                if (content.style.display === "block") {
-                  content.style.display = "none";
-                } else {
-                  content.style.display = "block";
-                }
-              });
-            }
-          </script>
+var i;
 
-        </body>  
-        </html>`;
+for (i = 0; i < coll.length; i++) {
+  coll[i].addEventListener("click", function() {
+    this.classList.toggle("active");
+    var content = this.nextElementSibling;
+    if (content.style.display === "block") {
+      content.style.display = "none";
+    } else {
+      content.style.display = "block";
+    }
+  });
+}
+</script>
+
+  </body>  
+  </html>`;
+  }
+
+  getDurationInHoursOnly(millis: number) {
+    if (millis > this.ONE_DAY_MILLISECONDS) {
+      return "(" + timeFormat.formatTimeFromMiliseconds(millis, "h[h] m[m]") + ")";
+    }
+
+    return "";
   }
 
   getStyles() {
