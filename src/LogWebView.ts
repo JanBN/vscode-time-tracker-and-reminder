@@ -76,7 +76,7 @@ export class LogWebView {
         }
       });
 
-      return timeFormat.formatTimeFromMiliseconds(Math.floor(totalSum / usedDays.length));
+      return this.getDurationInHoursOnly(Math.floor(totalSum / usedDays.length));
     }
 
     return 0;
@@ -115,7 +115,7 @@ export class LogWebView {
     }
 
     return `<h2 style="padding-top:20px"> ${year} </h2>
-    <b> Total time spent: </b> ${timeFormat.formatTimeFromMiliseconds(yearSum)} ${this.getDurationInHoursOnly(yearSum)}
+    <b> Total time spent: </b> ${this.getDurationInHoursOnly(yearSum)} ${this.getFromatInDaysIfNeeded(yearSum)}
 
         <h3 style="" class="collapsible active"> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> Days</h3>
         <div class="content" style="display:block">
@@ -279,7 +279,7 @@ export class LogWebView {
         totalDateSum = totalDateTimeMillisecondsArray && totalDateTimeMillisecondsArray.length > 0 ? totalDateTimeMillisecondsArray.reduce((accumulator, currentValue) => accumulator + currentValue) : 0;
       }
 
-      const totalDateString = timeFormat.formatTimeFromMiliseconds(totalDateSum);
+      const totalDateString = this.getDurationInHoursOnly(totalDateSum);
 
       const grouppedByWorkspace = timeIntervalUtils.groupBy(timeIntervals, 'workspace');
 
@@ -304,12 +304,12 @@ export class LogWebView {
           continue;
         }
 
-        const workspaceSumString = timeFormat.formatTimeFromMiliseconds(workspaceSum, workspaceSum < 60 * 1000 ? "y[y] M[M] w[w] d[d] h[h] m[m] s[s]" : "y[y] M[M] w[w] d[d] h[h] m[m]");
+        const workspaceSumString = this.getDurationInHoursOnly(workspaceSum);
         tableRows.push(`
           <tr>
             <td style="width: 150px;"><b>${dateString}</b></td>
             <td style="width: 500px;">${workspaceName}</td> 
-            <td style="min-width: 100px;">${workspaceSumString} ${this.getDurationInHoursOnly(workspaceSum)}</td> 
+            <td style="min-width: 100px;">${workspaceSumString} ${this.getFromatInDaysIfNeeded(workspaceSum)}</td> 
           </tr>
           `);
         dateString = ""; // clear date string so it is shwon only the first time
@@ -319,7 +319,7 @@ export class LogWebView {
           <tr>
             <td style="min-width: 100px;"></td>
             <td style="min-width: 100px;"><b>${totalLabel ? totalLabel : "Total"}</b></td> 
-            <td style="min-width: 100px;"><b>${totalDateString} ${this.getDurationInHoursOnly(totalDateSum)}</b></td> 
+            <td style="min-width: 100px;"><b>${totalDateString} ${this.getFromatInDaysIfNeeded(totalDateSum)}</b></td> 
           </tr>
           `);
     }
@@ -391,12 +391,12 @@ export class LogWebView {
       const timeIntervals: TimeInterval[] = dateTimeIntervals[key];
       const totalDateTimeMillisecondsArray = timeIntervals.map(x => x.end - x.start);
       const totalDateSum = totalDateTimeMillisecondsArray && totalDateTimeMillisecondsArray.length > 0 ? totalDateTimeMillisecondsArray.reduce((accumulator, currentValue) => accumulator + currentValue) : 0;
-      const totalDateString = timeFormat.formatTimeFromMiliseconds(totalDateSum);
+      const totalDateString = this.getDurationInHoursOnly(totalDateSum);
 
       tableRows.push(`
           <tr>
             <td style="min-width: 100px;"><b>${dateString}</b></td> 
-            <td style="min-width: 100px;">${totalDateString} ${this.getDurationInHoursOnly(totalDateSum)}</td> 
+            <td style="min-width: 100px;">${totalDateString} ${this.getFromatInDaysIfNeeded(totalDateSum)}</td> 
           </tr>
           `);
     }
@@ -464,13 +464,13 @@ export class LogWebView {
                 </thead>
                 <tbody>
                     <tr>
-                        <td style="min-width: 100px;">${timeFormat.formatTimeFromMiliseconds(todayMilliseconds)}</td>
-                        <td style="min-width: 100px;">${timeFormat.formatTimeFromMiliseconds(yesterdayMilliseconds)}</td>
-                        <td style="min-width: 100px;">${timeFormat.formatTimeFromMiliseconds(thisWeekMilliseconds)} ${this.getDurationInHoursOnly(thisWeekMilliseconds)}</td>
-                        <td style="min-width: 100px;">${timeFormat.formatTimeFromMiliseconds(last7DaysMilliseconds)} ${this.getDurationInHoursOnly(last7DaysMilliseconds)}</td>
-                        <td style="min-width: 100px;">${timeFormat.formatTimeFromMiliseconds(lastWeekMilliseconds)} ${this.getDurationInHoursOnly(lastWeekMilliseconds)}</td>
-                        <td style="min-width: 100px;">${timeFormat.formatTimeFromMiliseconds(thisMonthMilliseconds)} ${this.getDurationInHoursOnly(thisMonthMilliseconds)}</td>
-                        <td style="min-width: 100px;">${timeFormat.formatTimeFromMiliseconds(lastMonthMilliseconds)} ${this.getDurationInHoursOnly(lastMonthMilliseconds)}</td>
+                        <td style="min-width: 100px;">${this.getDurationInHoursOnly(todayMilliseconds)}${this.getFromatInDaysIfNeeded(todayMilliseconds)} </td>
+                        <td style="min-width: 100px;">${this.getDurationInHoursOnly(yesterdayMilliseconds)}${this.getFromatInDaysIfNeeded(yesterdayMilliseconds)} </td>
+                        <td style="min-width: 100px;">${this.getDurationInHoursOnly(thisWeekMilliseconds)} ${this.getFromatInDaysIfNeeded(thisWeekMilliseconds)}</td>
+                        <td style="min-width: 100px;">${this.getDurationInHoursOnly(last7DaysMilliseconds)} ${this.getFromatInDaysIfNeeded(last7DaysMilliseconds)}</td>
+                        <td style="min-width: 100px;">${this.getDurationInHoursOnly(lastWeekMilliseconds)} ${this.getFromatInDaysIfNeeded(lastWeekMilliseconds)}</td>
+                        <td style="min-width: 100px;">${this.getDurationInHoursOnly(thisMonthMilliseconds)} ${this.getFromatInDaysIfNeeded(thisMonthMilliseconds)}</td>
+                        <td style="min-width: 100px;">${this.getDurationInHoursOnly(lastMonthMilliseconds)} ${this.getFromatInDaysIfNeeded(lastMonthMilliseconds)}</td>
                         <td style="min-width: 100px;">${this.getAverageDayTimeString()} </td>
                       </tr>
               </tbody>
@@ -502,11 +502,17 @@ for (i = 0; i < coll.length; i++) {
   }
 
   getDurationInHoursOnly(millis: number) {
-    if (millis > this.ONE_DAY_MILLISECONDS) {
-      return "(" + timeFormat.formatTimeFromMiliseconds(millis, "h[h] m[m]") + ")";
+    const format = millis < 60 * 1000 ? "h[h] m[m] s[s]" : "h[h] m[m]";
+    return timeFormat.formatTimeFromMiliseconds(millis, format);
+  }
+
+  getFromatInDaysIfNeeded(millis: number) {
+    if (millis >= (this.ONE_DAY_MILLISECONDS)) {
+      return "(" + timeFormat.formatTimeFromMiliseconds(millis) + ")";
     }
 
     return "";
+
   }
 
   getStyles() {
