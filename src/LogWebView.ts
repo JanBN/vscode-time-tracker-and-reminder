@@ -196,7 +196,7 @@ export class LogWebView {
             </table>
           </div>
 
-          <h4 style="" class="collapsible content_padding_left"> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> Months</h4>
+          <h4 style="" class="collapsible content_padding_left"> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> Detail</h4>
           <div class="content content_padding_left">
             <table class="rtable">
               <tbody>
@@ -214,8 +214,43 @@ export class LogWebView {
               </tbody>
             </table>
           </div>
-          
+   
         </div>
+
+
+        <h3 style="" class="collapsible"> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> Year</h3>
+        <div class="content">
+
+          <h4 style="" class="collapsible content_padding_left"> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> Summary</h4>
+          <div class="content content_padding_left" >
+            <table class="rtable">
+              <tbody>
+                ${this.getPeriodSummaryData(timeIntervals, "year", "years", "YYYY", "Year").join("")}
+              </tbody>
+            </table>
+          </div>
+
+          <h4 style="" class="collapsible content_padding_left"> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> Detail</h4>
+          <div class="content content_padding_left">
+            <table class="rtable">
+              <tbody>
+                ${this.getTimePeriodDateData(timeIntervals, "year", "years", "YYYY", "Year").join("")}
+              </tbody>
+            </table>
+          </div>
+
+          <h4 style="" class="collapsible content_padding_left"> <span class="arrow-down">⯆</span> <span class="arrow-right">⯈</span> By workspace</h4>
+          <div class="content content_padding_left">
+            <div>*Shows how long was each workspace opend. Multiple workspaces could have been opened simultaneously. Total count takes it into account.</div>
+            <table class="rtable">
+              <tbody>
+                ${this.getTimePeriodDateByWorkspaceData(timeIntervals, "year", "years", "YYYY", "Year").join("")}
+              </tbody>
+            </table>
+          </div>
+   
+        </div>
+
 
 
         </div>
