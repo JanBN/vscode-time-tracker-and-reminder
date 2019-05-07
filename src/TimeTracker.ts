@@ -7,6 +7,7 @@ import * as vscode from 'vscode';
 import { LogWebView } from './LogWebView';
 import { timeFormat } from './TimeFormat';
 import { consolidator } from './Consolidator';
+import * as Git from './@types/git';
 
 export const WORKSPACE_NAME_DELIMITER = "; ";
 
@@ -23,6 +24,10 @@ export class TimeTracker {
     _startAppIntervals: TimeInterval[] = [];
     _isStopped: boolean = false;
     _stopStartAt: number;
+    _simpleGit: any;
+    _gitAPI: Git.API;
+    _lastBranchName: string;
+    _gotOnRepositoryDidChangeSubscribes: vscode.Disposable[] = [];
 
     constructor(context: vscode.ExtensionContext) {
 
@@ -50,7 +55,10 @@ export class TimeTracker {
 
 
         this._context = context;
+        this._gitAPI = vscode.extensions.getExtension('vscode.git').exports.getAPI(1);
+
         this._storage = new YearStorage(this._context);
+        this.initGit();
 
         this.startCurrentTimenterval();
         this.initReminders();
@@ -66,7 +74,6 @@ export class TimeTracker {
             vscode.workspace.openTextDocument(this._storage._globalStoragePath).then(doc => vscode.window.showTextDocument(doc))
             vscode.window.showInformationMessage(this._storage._globalStoragePath);
         });
-
 
         this.recomputeStatusBar();
         this.initEventsHandlers();
@@ -117,10 +124,68 @@ export class TimeTracker {
         }
     }
 
+    private initGit() {
+        const onDidOpenRepositorySubs = this._gitAPI.onDidOpenRepository(rep => {
+            this._gotOnRepositoryDidChangeSubscribes.forEach(x => x.dispose());
+            this._gitAPI.repositories.forEach(rep => {
+                const subscribe = rep.state.onDidChange(() => {
+
+                    if (rep.state.HEAD && rep.state.HEAD.name && this._lastBranchName != rep.state.HEAD.name) {
+                        this._lastBranchName = rep.state.HEAD.name;
+
+                        if (this._config.trackGitBranch) {
+                            console.log("calling workspace changed");
+                            console.log(rep.state.HEAD.name);
+                            this.gitBranchChenged();
+                        }
+                    }
+                });
+
+                this._gotOnRepositoryDidChangeSubscribes.push(subscribe);
+            });
+
+            const currentBranchName = this.getGitBranchName();
+            if (this._config.trackGitBranch && currentBranchName != this._lastBranchName) {
+                console.log("calling workspace changed");
+                this.gitBranchChenged();
+
+                this._lastBranchName = currentBranchName;
+            }
+        });
+    }
+
+    private getWorkspaceName(): string {
+        let result = workspace && workspace.name || "--";
+        if (this._gitAPI && this._config.trackGitBranch) {
+            const branchName = this.getGitBranchName();
+
+            if (branchName) {
+                result = `${result} (${branchName})`;
+            }
+        }
+
+        return result;
+    }
+
+    private getGitBranchName(): string {
+        if (this._gitAPI) {
+            const branchNames = [];
+            this._gitAPI.repositories.forEach(rep => {
+                if (rep.state.HEAD && rep.state.HEAD.name) {
+                    branchNames.push(rep.state.HEAD.name)
+                }
+            });
+
+            return branchNames.join(", ");
+        }
+
+        return null;
+    }
+
     private startCurrentTimenterval(date?: number) {
         this._currentTimeInterval = {
             start: date ? date : Date.now(),
-            workspace: workspace && workspace.name || "--"
+            workspace: this.getWorkspaceName()
         };
 
         this._startAppIntervals.push(this._currentTimeInterval);
@@ -131,19 +196,45 @@ export class TimeTracker {
         this._storage.addTimeInterval(this._currentTimeInterval);
     }
 
+    private gitBranchChenged() {
+
+        this.endCurrentTimeInterval();
+        this._storage.addTimeInterval(this._currentTimeInterval);
+
+        console.log("END");
+        console.log(this._currentTimeInterval);
+
+        this.startCurrentTimenterval();
+
+        console.log("START");
+        console.log(this._currentTimeInterval);
+
+        this.recomputeStatusBar();
+    }
+
     private workspaceChenged() {
+
         this.endCurrentTimeInterval();
         this._storage.addTimeInterval(this._currentTimeInterval);
 
         this.startCurrentTimenterval();
+
         this.recomputeStatusBar();
     }
 
     private configurationChanged() {
+
+        const isTrackGitBranchChange = this._config.trackGitBranch != workspace.getConfiguration('time-tracker').trackGitBranch;
         this._config = workspace.getConfiguration('time-tracker');
+
         this.initReminders();
         this.recomputeStatusBar();
         this.setStatusBarCommand();
+
+        if (isTrackGitBranchChange)
+        {
+            this.gitBranchChenged();
+        }
     }
 
     private createStatusBars() {
@@ -342,8 +433,7 @@ export class TimeTracker {
 
         const saveInterval = this.getSaveInterval();
 
-        if (saveInterval && Date.now() - this._currentTimeInterval.start > saveInterval)
-        {
+        if (saveInterval && Date.now() - this._currentTimeInterval.start > saveInterval) {
             this.saveData();
         }
 
@@ -362,7 +452,7 @@ export class TimeTracker {
     private createInterval() {
         this._invervalId = setInterval(() => {
             this.timeElapsed();
-        }, this.MILISECONDS_IN_MINUTE );
+        }, this.MILISECONDS_IN_MINUTE);
 
         this.timeElapsed();
     }
@@ -397,8 +487,7 @@ export class TimeTracker {
         vscode.window.showInformationMessage('Data cleared');
     }
 
-    private exportLog()
-    {
+    private exportLog() {
         new LogWebView(this._context, this._storage, !this._currentTimeInterval.end ? this._currentTimeInterval : null).exportLog();
     }
 

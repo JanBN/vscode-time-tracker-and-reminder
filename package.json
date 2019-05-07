@@ -60,6 +60,12 @@
 					"default": false,
 					"description": "Show total workspace time in status bar"
 				},
+				"time-tracker.trackGitBranch": {
+					"type": "boolean",
+					"default": false,
+					"description": "Track git branch name"
+				},
+				
 				"time-tracker.showTodayTime": {
 					"type": "boolean",
 					"default": true,
@@ -107,6 +113,10 @@
 		"postinstall": "node ./node_modules/vscode/bin/install"
 	},
 	"icon": "assets/icon.png",
+
+	"extensionDependencies": [
+		"vscode.git"
+	],
 	"devDependencies": {
 		"@types/node": "^8.10.25",
 		"@types/mocha": "^2.2.42",
