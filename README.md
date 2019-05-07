@@ -42,6 +42,7 @@ Track your time using vscode editor, see log, and remind you pauses for blinking
 "time-tracker.showTodayTime": true,
 "time-tracker.showFromStartTime": false,
 "time-tracker.showNextReminder": true,
+"time-tracker.trackGitBranch": false, // tracks also git branch names
 
 "time-tracker.onStatusbarBarClick": "show log" 
 // possible values: "show log", "stop time tracking"

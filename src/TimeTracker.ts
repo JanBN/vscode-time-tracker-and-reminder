@@ -197,28 +197,16 @@ export class TimeTracker {
     }
 
     private gitBranchChenged() {
-
         this.endCurrentTimeInterval();
         this._storage.addTimeInterval(this._currentTimeInterval);
-
-        console.log("END");
-        console.log(this._currentTimeInterval);
-
         this.startCurrentTimenterval();
-
-        console.log("START");
-        console.log(this._currentTimeInterval);
-
         this.recomputeStatusBar();
     }
 
     private workspaceChenged() {
-
         this.endCurrentTimeInterval();
         this._storage.addTimeInterval(this._currentTimeInterval);
-
         this.startCurrentTimenterval();
-
         this.recomputeStatusBar();
     }
 
