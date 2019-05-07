@@ -125,8 +125,17 @@ export class YearStorage {
   private loadTimeIntervals(): TimeInterval[] {
     if (fs.existsSync(this._globalStoragePath)) {
       const json = fs.readFileSync(this._globalStoragePath, "utf8");
-      const result = JSON.parse(json) as TimeInterval[];
-      return result;
+      try {
+        const result = JSON.parse(json) as TimeInterval[];
+        return result;
+      }
+      catch (ex) {
+        try {
+          fs.unlinkSync(this._globalStoragePath);
+        }
+        catch (ee) { }
+      }
+      return [];
     }
 
     return [];
@@ -134,7 +143,10 @@ export class YearStorage {
 
   private saveTimeIntervals(value: TimeInterval[]) {
     value = value.sort((a, b) => a.start - b.start);
-    fs.unlinkSync(this._globalStoragePath);
+    try {
+      fs.unlinkSync(this._globalStoragePath);
+    }
+    catch (e) { }
     fs.writeFileSync(this._globalStoragePath, JSON.stringify(value), "utf8");
   }
 }
