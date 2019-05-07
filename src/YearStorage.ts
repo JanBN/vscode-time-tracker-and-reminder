@@ -134,6 +134,7 @@ export class YearStorage {
 
   private saveTimeIntervals(value: TimeInterval[]) {
     value = value.sort((a, b) => a.start - b.start);
+    fs.unlinkSync(this._globalStoragePath);
     fs.writeFileSync(this._globalStoragePath, JSON.stringify(value), "utf8");
   }
 }
