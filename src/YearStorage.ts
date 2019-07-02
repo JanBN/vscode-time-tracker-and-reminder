@@ -111,6 +111,10 @@ export class YearStorage {
     this.saveTimeIntervals([...oldData, ...this._newTimeIntervals]);
   }
 
+  public saveEditedData(intervals:TimeInterval[]) {
+    this.saveTimeIntervals([...intervals, ...this._newTimeIntervals]);
+  }
+
   public clearAllData() {
     this.clearCounters();
     this.saveTimeIntervals([]);

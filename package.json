@@ -39,7 +39,13 @@
 			{
 				"command": "extension.showLog",
 				"title": "(Time Tracker & Reminder) Show log"
+			},
+			{
+				"command": "extension.editLog",
+				"title": "(Time Tracker & Reminder) Edit log"
 			}
+
+			
 		],
 		"configuration": {
 			"type": "object",

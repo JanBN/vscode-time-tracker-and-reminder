@@ -8,6 +8,7 @@ import { LogWebView } from './LogWebView';
 import { timeFormat } from './TimeFormat';
 import { consolidator } from './Consolidator';
 import * as Git from './@types/git';
+import { LogsEditorWebView } from './LogsEditorWebView';
 
 export const WORKSPACE_NAME_DELIMITER = "; ";
 
@@ -70,6 +71,7 @@ export class TimeTracker {
         vscode.commands.registerCommand('extension.toggleStop', () => this.toggleStop());
         vscode.commands.registerCommand('extension.showLog', () => this.showLogWebView());
         vscode.commands.registerCommand('extension.exportLog', () => this.exportLog());
+        vscode.commands.registerCommand('extension.editLog', () => this.editLog());
         vscode.commands.registerCommand('extension.showDataFile', () => {
             vscode.workspace.openTextDocument(this._storage._globalStoragePath).then(doc => vscode.window.showTextDocument(doc))
             vscode.window.showInformationMessage(this._storage._globalStoragePath);
@@ -219,8 +221,7 @@ export class TimeTracker {
         this.recomputeStatusBar();
         this.setStatusBarCommand();
 
-        if (isTrackGitBranchChange)
-        {
+        if (isTrackGitBranchChange) {
             this.gitBranchChenged();
         }
     }
@@ -473,6 +474,12 @@ export class TimeTracker {
         this.startCurrentTimenterval();
         this.recomputeStatusBar();
         vscode.window.showInformationMessage('Data cleared');
+    }
+
+    private editLog() {
+        new LogsEditorWebView(this._context, this._storage, () => {
+            this.saveData();
+        }).show();
     }
 
     private exportLog() {
