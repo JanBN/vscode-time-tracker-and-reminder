@@ -47,23 +47,20 @@ export class LogsEditorWebView {
         switch (message.command) {
           case 'delete':
             {
-              vscode.window.showInformationMessage("Saving");
-
               const id = message.id;
               this.timeIntervalsWithIds = this.timeIntervalsWithIds.filter(x => x.index != id);
 
               this._storage.saveEditedData(this.timeIntervalsWithIds.map(x => x.timeInterval));
               this._afterSaveFunc();
 
-
+              this._panel.webview.html = " ";
               this._panel.webview.html = this.getWebviewContent();
-              vscode.window.showInformationMessage("Saved...");
+
               return;
             }
 
           case 'update':
             {
-              vscode.window.showInformationMessage("Saving");
               const { id, start, end, workspace } = message;
               const interval = this.timeIntervalsWithIds.find(x => x.index == id)
               interval.timeInterval.workspace = workspace;
@@ -73,8 +70,9 @@ export class LogsEditorWebView {
               this._storage.saveEditedData(this.timeIntervalsWithIds.map(x => x.timeInterval));
               this._afterSaveFunc();
 
+              this._panel.webview.html = " ";
               this._panel.webview.html = this.getWebviewContent();
-              vscode.window.showInformationMessage("Saved...");
+
               return;
             }
         }
@@ -90,7 +88,6 @@ export class LogsEditorWebView {
 
 
   private getWebviewContent() {
-
     const tableRows = [];
     this.timeIntervalsWithIds.forEach(x => {
       const formattedStart = moment(x.timeInterval.start).format(this.DATE_TIME_FORMAT);
@@ -131,21 +128,53 @@ export class LogsEditorWebView {
                       </tr>
                   </thead>
                   <tbody>
-                  ${tableRows.map(x => x)}                   
+                           ${tableRows.join("")}
                 </tbody>
               </table>
+              
+              <div  id="saving_overlay" 
+              style="position: fixed;
+                    display: none;
+                    width: 100%;
+                    height: 100%;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background-color: rgba(0,0,0,0.5);
+                    z-index: 2; 
+                    cursor: pointer;"
+                >
+                <div id="text" style="position: absolute;
+                                      top: 50%;
+                                      left: 50%;
+                                      font-size: 50px;
+                                      color: white;
+                                      transform: translate(-50%,-50%);
+                                      -ms-transform: translate(-50%,-50%);"
+                >
+                  Saving...
+                </div>
+              </div>
 
 <script>
   
     vscode = acquireVsCodeApi();
 
+    saving_overlay = document.getElementById("saving_overlay");
+    saving_overlay.style.display = "none";
+  
     function deleteInterval(id)
     {
+        var saving_overlay = document.getElementById("saving_overlay").style.display = "block";
+
         vscode.postMessage({command: 'delete',id: id})
     }
 
     function updateInterval(id)
     {
+        var saving_overlay = document.getElementById("saving_overlay").style.display = "block";
+
         var start = document.getElementById("startInput_"+id).value;
         var end = document.getElementById("endInput_"+id).value;
         var workspace = document.getElementById("workspace_"+id).value;
