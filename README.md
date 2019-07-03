@@ -5,6 +5,11 @@ Track your time using vscode editor, see log, and remind you pauses for blinking
 ![](https://raw.githubusercontent.com/JanBN/vscode-time-tracker-and-reminder/master/assets/demo.gif)
 
 
+## What's new
+  - Log editor
+
+  ![](https://raw.githubusercontent.com/JanBN/vscode-time-tracker-and-reminder/master/assets/editor.jpg)
+    
 ## Features
 
 #### Time count
@@ -12,6 +17,7 @@ Track your time using vscode editor, see log, and remind you pauses for blinking
   - Counts total time spent in the workspace
   - Counts total time spent from vscode start
   - Detailed log (by days, weeks, months, years)
+  - Editor for editing records (not very fast thought)
 
   #### Reminders
   - Periodic custom reminder 
@@ -30,6 +36,8 @@ Track your time using vscode editor, see log, and remind you pauses for blinking
 **(Time Tracker & Reminder) Show log** - Shows time spent log
 
 **(Time Tracker & Reminder) Export log** - Export log into html file
+
+**(Time Tracker & Reminder) Edit log** - Log editor
 
 
 ## Extension Settings
