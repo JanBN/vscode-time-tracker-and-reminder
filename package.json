@@ -2,7 +2,7 @@
 	"name": "time-tracker-and-reminder",
 	"displayName": "Time Tracker & Reminder",
 	"description": "Track your working time and remind your blink pauses",
-	"version": "1.11.0",
+	"version": "1.12.0",
 	"publisher": "JanBn",
 	"repository": {
 		"type": "git",
@@ -44,8 +44,6 @@
 				"command": "extension.editLog",
 				"title": "(Time Tracker & Reminder) Edit log"
 			}
-
-			
 		],
 		"configuration": {
 			"type": "object",
